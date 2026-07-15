@@ -1,0 +1,19 @@
+[project]
+name = "mdlfca"
+version = "0.0.1"
+description = "Learning concept DAGs from binary data by MDL — a probabilistic reworking of Formal Concept Analysis"
+requires-python = ">=3.11"
+dependencies = ["numpy>=1.26"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
