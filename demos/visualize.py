@@ -1,20 +1,17 @@
-"""Visual demos for mdl-fca. Renders, for a small planted example:
+"""Visual demos for mdl-fca. For each scenario it renders into demos/out/:
 
-  1. the planted DAG and the learned DAG           -> dag_planted.png, dag_learned.png
-  2. the object codes as a heatmap (which items    -> codes.png
-     each object activates, concepts + attributes)
-  3. the total codelength trajectory and the       -> codelength.png
-     per-move delta L (how many bits each move saved)
+  1. <name>_codes.png      -- planted DAG (if known) stacked above the learned
+                              DAG stacked above the data array, all aligned so
+                              each attribute node sits over its data column; a
+                              labelled legend explains every colour.
+  2. <name>_codelength.png -- the total codelength trajectory and the per-move
+                              delta L (bits each accepted move saved).
 
-Deps beyond the project: matplotlib (plots) and Graphviz `dot` on PATH (DAGs).
-Run:  PYTHONPATH=src python3 demos/visualize.py
-Output PNGs land in demos/out/.
+Dep beyond the project: matplotlib. Run: PYTHONPATH=src python3 demos/visualize.py
 """
 from __future__ import annotations
 
 import os
-import shutil
-import subprocess
 import sys
 
 import numpy as np
@@ -24,34 +21,6 @@ from mdlfca.generator import make_planted
 from mdlfca.learner import GreedyLearner
 
 OUT = os.path.join(os.path.dirname(__file__), "out")
-
-
-def dag_to_dot(dag, title, active=None):
-    """Graphviz source. Concepts are boxes, attributes are ellipses. If `active`
-    (a set of item ids) is given, activated nodes are highlighted."""
-    active = active or set()
-    lines = [f'digraph G {{ rankdir=TB; label="{title}"; labelloc=t;',
-             '  node [fontname="Helvetica"];']
-    for a in range(dag.n_attrs):
-        fill = "#ffd27f" if a in active else "#cfe0ee"
-        lines.append(f'  a{a} [label="a{a}", shape=ellipse, style=filled, fillcolor="{fill}"];')
-    for c in dag.concepts:
-        fill = "#e8873a" if c in active else "#f2c48a"
-        lines.append(f'  c{c} [label="C{c}", shape=box, style="rounded,filled", fillcolor="{fill}"];')
-    for c in dag.concepts:
-        for ch in dag.children[c]:
-            tgt = f"a{ch}" if dag.is_attribute(ch) else f"c{ch}"
-            lines.append(f"  c{c} -> {tgt};")
-    lines.append("}")
-    return "\n".join(lines)
-
-
-def render_dot(dot_src, png_path):
-    if not shutil.which("dot"):
-        print("  (skipping DAG render: Graphviz `dot` not on PATH)")
-        return
-    subprocess.run(["dot", "-Tpng", "-o", png_path], input=dot_src.encode(), check=True)
-    print(f"  wrote {png_path}")
 
 
 def _node_layout(dag):
@@ -83,23 +52,66 @@ def _node_layout(dag):
     return x, y
 
 
-def plot_dag_over_matrix(res, dag, png_path, active=None, n_show=40):
-    """Data array with the learned DAG drawn on top, each attribute node aligned
-    to its column. Objects are sorted by their predicted attribute pattern so the
-    blocks a concept generates line up under it."""
+# colour scheme, shared by every panel and the legend
+COL = dict(attr="#cfe0ee", attr_on="#ffd27f", concept="#f2c48a", concept_on="#e8873a",
+           attr_edge="#31597a", concept_edge="#7a4a12")
+
+
+def _draw_dag(ax, dag, A, active, panel_label):
+    """Draw one DAG into `ax` with attribute sinks aligned to columns 0..A-1."""
+    x, y = _node_layout(dag)
+    ymax = max(y.values()) if y else 0
+    for c in dag.concepts:
+        for ch in dag.children[c]:
+            ax.plot([x[c], x[ch]], [y[c], y[ch]], "-", color="#b9b9b9", lw=1, zorder=1)
+    for c in dag.concepts:
+        on = active is not None and c in active
+        ax.scatter([x[c]], [y[c]], s=460, marker="s", zorder=2,
+                   color=COL["concept_on"] if on else COL["concept"],
+                   edgecolors=COL["concept_edge"])
+        ax.text(x[c], y[c], f"C{c}", ha="center", va="center", fontsize=7.5, zorder=3)
+    for a in range(A):
+        on = active is not None and a in active
+        ax.scatter([a], [0], s=240, zorder=2,
+                   color=COL["attr_on"] if on else COL["attr"], edgecolors=COL["attr_edge"])
+    ax.set_xlim(-0.7, A - 0.3)
+    ax.set_ylim(-0.6, ymax + 0.6)
+    ax.axis("off")
+    ax.text(-0.02, 0.5, panel_label, transform=ax.transAxes, ha="right", va="center",
+            fontsize=11, fontweight="bold", rotation=90)
+    return ymax
+
+
+def _legend_handles():
+    import matplotlib.patches as mpatches
+    from matplotlib.lines import Line2D
+    m = lambda c, e: Line2D([], [], marker="o", ls="", mfc=c, mec=e, ms=11)
+    s = lambda c, e: Line2D([], [], marker="s", ls="", mfc=c, mec=e, ms=11)
+    return [
+        (m(COL["attr"], COL["attr_edge"]), "attribute (sink)"),
+        (m(COL["attr_on"], COL["attr_edge"]), "attribute in example object's code"),
+        (s(COL["concept"], COL["concept_edge"]), "concept"),
+        (s(COL["concept_on"], COL["concept_edge"]), "concept in example object's code"),
+        (mpatches.Patch(fc="#08306b"), "attribute predicted (matrix cell = 1)"),
+        (mpatches.Patch(fc="#f7fbff", ec="#c8c8c8"), "not predicted (cell = 0)"),
+    ]
+
+
+def plot_overview(res, dag, planted, png_path, active=None, n_show=40):
+    """Stacked, column-aligned figure: planted DAG (if known) above the learned
+    DAG above the data array, so matching concepts line up over the same columns.
+    A labelled legend explains every colour."""
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
     A = dag.n_attrs
-    # predicted attributes per object (closure of the code) drive the row order
     pred = []
     for code in res.codes:
         m = 0
         for k in code:
             m |= dag.closure_mask(k) if not dag.is_attribute(k) else (1 << k)
         pred.append(m)
-    # sample evenly across the sorted range so sparse-to-dense variety shows
     ranked = sorted(range(len(res.codes)), key=lambda i: pred[i])
     if len(ranked) > n_show:
         picks = np.linspace(0, len(ranked) - 1, n_show).round().astype(int)
@@ -108,40 +120,36 @@ def plot_dag_over_matrix(res, dag, png_path, active=None, n_show=40):
         order = ranked
     M = np.array([[(pred[i] >> a) & 1 for a in range(A)] for i in order], dtype=float)
 
-    x, y = _node_layout(dag)
-    ymax = max(y.values())
+    planted_dag = planted.dag if planted is not None else None
+    pl_ymax = (max(_node_layout(planted_dag)[1].values()) if planted_dag else 0)
+    ln_ymax = max(_node_layout(dag)[1].values()) if list(dag.concepts) else 0
 
-    fig, (axd, axm) = plt.subplots(
-        2, 1, figsize=(max(7, A * 0.55), 9),
-        gridspec_kw=dict(height_ratios=[ymax + 1.2, 5], hspace=0.05))
+    if planted_dag is not None:
+        heights = [pl_ymax + 1.4, ln_ymax + 1.4, 6]
+        fig, axes = plt.subplots(3, 1, figsize=(max(8, A * 0.55), 11),
+                                 gridspec_kw=dict(height_ratios=heights, hspace=0.12))
+        ax_pl, ax_ln, axm = axes
+        _draw_dag(ax_pl, planted_dag, A, None, "planted")
+    else:
+        heights = [ln_ymax + 1.4, 6]
+        fig, axes = plt.subplots(2, 1, figsize=(max(8, A * 0.55), 9),
+                                 gridspec_kw=dict(height_ratios=heights, hspace=0.12))
+        ax_ln, axm = axes
 
-    # ---- DAG on top ----
-    for c in dag.concepts:
-        for ch in dag.children[c]:
-            axd.plot([x[c], x[ch]], [y[c], y[ch]], "-", color="#b9b9b9", lw=1, zorder=1)
-    for c in dag.concepts:
-        on = active is not None and c in active
-        axd.scatter([x[c]], [y[c]], s=520, marker="s", zorder=2,
-                    color="#e8873a" if on else "#f2c48a", edgecolors="#7a4a12")
-        axd.text(x[c], y[c], f"C{c}", ha="center", va="center", fontsize=8, zorder=3)
-    for a in range(A):
-        on = active is not None and a in active
-        axd.scatter([a], [0], s=300, zorder=2,
-                    color="#ffd27f" if on else "#cfe0ee", edgecolors="#31597a")
-    axd.set_xlim(-0.7, A - 0.3)
-    axd.set_ylim(-0.6, ymax + 0.6)
-    axd.axis("off")
-    axd.set_title("learned concept DAG (sinks aligned to the columns below)")
+    _draw_dag(ax_ln, dag, A, active, "learned")
 
-    # ---- data array below, columns aligned ----
     axm.imshow(M, aspect="auto", cmap="Blues", interpolation="nearest",
-               extent=[-0.5, A - 0.5, n_show - 0.5, -0.5])
+               vmin=0, vmax=1, extent=[-0.5, A - 0.5, len(order) - 0.5, -0.5])
     axm.set_xlim(-0.7, A - 0.3)
     axm.set_xticks(range(A))
     axm.set_xticklabels([f"a{a}" for a in range(A)], fontsize=8)
-    axm.set_ylabel(f"objects (sorted, first {n_show})")
-    axm.set_title("predicted attributes per object", fontsize=10)
+    axm.set_ylabel(f"data — objects (sampled, {len(order)})", fontweight="bold")
 
+    handles = _legend_handles()
+    fig.legend([h for h, _ in handles], [t for _, t in handles],
+               loc="upper center", ncol=3, fontsize=8, frameon=True,
+               bbox_to_anchor=(0.5, 1.005))
+    fig.suptitle("planted vs. learned concept DAG, aligned to the data columns", y=1.03)
     fig.savefig(png_path, dpi=120, bbox_inches="tight")
     plt.close(fig)
     print(f"  wrote {png_path}")
@@ -229,15 +237,10 @@ def main():
         print(f"  X: {X.shape[0]} objects x {X.shape[1]} attributes | "
               f"learned {res.dag.num_concepts} concepts, L = {res.total:.0f}{extra}")
 
-        if planted is not None:
-            render_dot(dag_to_dot(planted.dag, f"planted DAG — {title}"),
-                       os.path.join(OUT, f"{name}_dag_planted.png"))
         # highlight the code of a well-populated object on the learned DAG
         example = max(res.codes, key=len) if res.codes else set()
-        render_dot(dag_to_dot(res.dag, f"learned DAG — {title}", active=example),
-                   os.path.join(OUT, f"{name}_dag_learned.png"))
-        plot_dag_over_matrix(res, res.dag, os.path.join(OUT, f"{name}_codes.png"),
-                             active=example)
+        plot_overview(res, res.dag, planted, os.path.join(OUT, f"{name}_codes.png"),
+                      active=example)
         plot_codelength(res, planted_L, os.path.join(OUT, f"{name}_codelength.png"),
                         title=title)
 
