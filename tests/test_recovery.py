@@ -86,3 +86,19 @@ def test_planted_recovery_three_levels():
     # depth built on depth, with nothing junk left over: exactly the planted
     # dictionary size (held across seeds 0-3,7 during tuning)
     assert res.dag.num_concepts == len(p.concept_ids), res.dag.num_concepts
+
+
+def test_planted_recovery_five_levels():
+    # A genuinely deep hierarchy (base + four levels above, 31 concepts). It is
+    # recovered in full *because* every level pays rent: level_weight=1.5 keeps
+    # lower-level activation frequent enough that base concepts are used directly,
+    # not only reached through a parent's closure. (At level_weight>=2 the upper
+    # levels dominate, the fine base concepts stop paying, and the MDL optimum is
+    # correctly a shallower model — so this is a statement about the rent regime,
+    # not just the search.) Unlike the 3-level case the concept count is not
+    # pinned exactly (a stray merge or two survives), so we check recovery and
+    # order rather than an exact dictionary size.
+    p = make_planted(n_attrs=48, level_sizes=(16, 8, 4, 2, 1), n_objects=2500,
+                     attrs_per_base=(2, 3), children_per_concept=(2, 3),
+                     level_weight=1.5, eps_plus=0.02, eps_minus=0.02, seed=3)
+    run_and_check(p, min_jaccard=0.9, min_order=0.85)
