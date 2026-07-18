@@ -47,3 +47,11 @@ PYTHONPATH=src python3 demos/visualize.py
 
 Needs `matplotlib`. Edit `build_scenarios()` to add cases or resize existing
 ones; keep them smallish so the DAG stays legible.
+
+## `tikz_export.py` → `tikz/`
+
+For LaTeX (Beamer / paper) contexts, `tikz_export.py` regenerates the same
+figures as **native TikZ/pgfplots** — drawn from scratch out of the learner's
+output, not traced from the PNGs — into `tikz/mdl-fca-demos.tex`. Vector and
+restyleable. See `tikz/README.md` for the build. The PNGs and the TikZ figures
+are kept side by side for comparison.

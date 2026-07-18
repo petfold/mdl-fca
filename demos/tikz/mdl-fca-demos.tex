@@ -1,0 +1,1662 @@
+\documentclass[11pt]{article}
+\usepackage[a4paper,margin=1.8cm]{geometry}
+\usepackage{lmodern}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.17}
+\usetikzlibrary{arrows.meta}
+\usepackage[hidelinks]{hyperref}
+\usepackage{microtype}
+
+\definecolor{cAttr}{RGB}{207,224,238}
+\definecolor{cAttrE}{RGB}{49,89,122}
+\definecolor{cConc}{RGB}{242,196,138}
+\definecolor{cConcOn}{RGB}{232,135,58}
+\definecolor{cAmberE}{RGB}{122,74,18}
+\definecolor{cCell}{RGB}{8,48,107}
+\definecolor{cGood}{RGB}{42,140,80}
+\definecolor{cPlantedC}{RGB}{42,140,80}
+
+\tikzset{
+  attr/.style={draw=cAttrE, circle, fill=cAttr, minimum size=3.4mm, inner sep=0pt},
+  concept/.style={draw=cAmberE, rounded corners=1pt, fill=cConc, minimum size=4.8mm, inner sep=1pt},
+  edge/.style={-{Latex[length=1.3mm]}, draw=black!30, line width=.5pt},
+  panellab/.style={font=\bfseries\small, rotate=90, anchor=center},
+  collab/.style={font=\fontsize{4.4}{5}\selectfont, anchor=north},
+  rentval/.style={font=\fontsize{5}{6}\selectfont, text=black!55, anchor=north},
+  cblab/.style={font=\scriptsize, anchor=west},
+}
+\pgfplotsset{
+  cltraj/.style={width=13cm, height=5cm, grid=both, grid style={black!12},
+     legend style={font=\scriptsize, at={(0.98,0.95)}, anchor=north east}, tick label style={font=\scriptsize}},
+  cldelta/.style={width=13cm, height=4cm, grid=both, grid style={black!12},
+     tick label style={font=\scriptsize}, yshift=-5.4cm},
+  cLine/.style={color=cConcOn, very thick, mark=*, mark size=1pt},
+  cPlanted/.style={color=cPlantedC, dashed, thick},
+}
+
+\newcommand{\keyfig}{%
+\begin{tikzpicture}[baseline]
+  \node[attr] (a) at (0,0) {}; \node[anchor=west, font=\footnotesize] at (0.35,0) {attribute (sink)};
+  \node[concept] (c) at (4.6,0) {}; \node[anchor=west, font=\footnotesize] at (5.0,0) {concept};
+  \node[concept, fill=cConcOn] (o) at (8.0,0) {}; \node[anchor=west, font=\footnotesize] at (8.4,0) {in example code};
+  \fill[cCell] (0,-0.6) rectangle (0.3,-0.9); \node[anchor=west, font=\footnotesize] at (0.35,-0.75) {matrix cell = 1 (predicted)};
+  \draw[cellframe] (4.6,-0.6) rectangle (4.9,-0.9); \node[anchor=west, font=\footnotesize] at (5.0,-0.75) {cell = 0 (not predicted)};
+\end{tikzpicture}}
+\tikzset{cellframe/.style={draw=black!35, line width=.4pt}}
+
+\begin{document}
+\begin{center}\Large\textbf{mdl-fca demo figures}\end{center}
+\noindent The learner builds a concept DAG that compresses a binary object$\times$attribute matrix, positing a concept only when it shortens the total description length. Figures are generated as native TikZ from the learner's output.\par\medskip
+\begin{center}\keyfig\end{center}
+\section*{Control: uncorrelated noise}
+Independent Bernoulli(0.3) with no hidden structure. Nothing is a suspicious coincidence, so no concept pays for itself: the learner returns \textbf{0 concepts}. The control for over-generation.\par\medskip
+\begin{center}\begin{tikzpicture}
+  \fill[cCell] (-0.464,-0.240) rectangle (0.464,-0.480);
+  \fill[cCell] (2.321,-0.240) rectangle (3.250,-0.480);
+  \fill[cCell] (4.179,-0.240) rectangle (5.107,-0.480);
+  \fill[cCell] (5.107,-0.240) rectangle (6.036,-0.480);
+  \fill[cCell] (0.464,-0.480) rectangle (1.393,-0.720);
+  \fill[cCell] (6.964,-0.480) rectangle (7.893,-0.720);
+  \fill[cCell] (5.107,-0.720) rectangle (6.036,-0.960);
+  \fill[cCell] (7.893,-0.720) rectangle (8.821,-0.960);
+  \fill[cCell] (2.321,-0.960) rectangle (3.250,-1.200);
+  \fill[cCell] (4.179,-0.960) rectangle (5.107,-1.200);
+  \fill[cCell] (5.107,-0.960) rectangle (6.036,-1.200);
+  \fill[cCell] (8.821,-0.960) rectangle (9.750,-1.200);
+  \fill[cCell] (0.464,-1.200) rectangle (1.393,-1.440);
+  \fill[cCell] (6.036,-1.200) rectangle (6.964,-1.440);
+  \fill[cCell] (7.893,-1.200) rectangle (8.821,-1.440);
+  \fill[cCell] (8.821,-1.200) rectangle (9.750,-1.440);
+  \fill[cCell] (-0.464,-1.440) rectangle (0.464,-1.680);
+  \fill[cCell] (2.321,-1.440) rectangle (3.250,-1.680);
+  \fill[cCell] (4.179,-1.440) rectangle (5.107,-1.680);
+  \fill[cCell] (6.036,-1.440) rectangle (6.964,-1.680);
+  \fill[cCell] (9.750,-1.440) rectangle (10.679,-1.680);
+  \fill[cCell] (-0.464,-1.680) rectangle (0.464,-1.920);
+  \fill[cCell] (1.393,-1.680) rectangle (2.321,-1.920);
+  \fill[cCell] (5.107,-1.680) rectangle (6.036,-1.920);
+  \fill[cCell] (8.821,-1.680) rectangle (9.750,-1.920);
+  \fill[cCell] (9.750,-1.680) rectangle (10.679,-1.920);
+  \fill[cCell] (-0.464,-1.920) rectangle (0.464,-2.160);
+  \fill[cCell] (1.393,-1.920) rectangle (2.321,-2.160);
+  \fill[cCell] (4.179,-1.920) rectangle (5.107,-2.160);
+  \fill[cCell] (5.107,-1.920) rectangle (6.036,-2.160);
+  \fill[cCell] (10.679,-1.920) rectangle (11.607,-2.160);
+  \fill[cCell] (3.250,-2.160) rectangle (4.179,-2.400);
+  \fill[cCell] (8.821,-2.160) rectangle (9.750,-2.400);
+  \fill[cCell] (10.679,-2.160) rectangle (11.607,-2.400);
+  \fill[cCell] (-0.464,-2.400) rectangle (0.464,-2.640);
+  \fill[cCell] (2.321,-2.400) rectangle (3.250,-2.640);
+  \fill[cCell] (7.893,-2.400) rectangle (8.821,-2.640);
+  \fill[cCell] (9.750,-2.400) rectangle (10.679,-2.640);
+  \fill[cCell] (10.679,-2.400) rectangle (11.607,-2.640);
+  \fill[cCell] (5.107,-2.640) rectangle (6.036,-2.880);
+  \fill[cCell] (11.607,-2.640) rectangle (12.536,-2.880);
+  \fill[cCell] (0.464,-2.880) rectangle (1.393,-3.120);
+  \fill[cCell] (1.393,-2.880) rectangle (2.321,-3.120);
+  \fill[cCell] (6.964,-2.880) rectangle (7.893,-3.120);
+  \fill[cCell] (7.893,-2.880) rectangle (8.821,-3.120);
+  \fill[cCell] (11.607,-2.880) rectangle (12.536,-3.120);
+  \fill[cCell] (-0.464,-3.120) rectangle (0.464,-3.360);
+  \fill[cCell] (1.393,-3.120) rectangle (2.321,-3.360);
+  \fill[cCell] (3.250,-3.120) rectangle (4.179,-3.360);
+  \fill[cCell] (4.179,-3.120) rectangle (5.107,-3.360);
+  \fill[cCell] (9.750,-3.120) rectangle (10.679,-3.360);
+  \fill[cCell] (11.607,-3.120) rectangle (12.536,-3.360);
+  \fill[cCell] (0.464,-3.360) rectangle (1.393,-3.600);
+  \fill[cCell] (3.250,-3.360) rectangle (4.179,-3.600);
+  \fill[cCell] (6.964,-3.360) rectangle (7.893,-3.600);
+  \fill[cCell] (8.821,-3.360) rectangle (9.750,-3.600);
+  \fill[cCell] (9.750,-3.360) rectangle (10.679,-3.600);
+  \fill[cCell] (11.607,-3.360) rectangle (12.536,-3.600);
+  \fill[cCell] (0.464,-3.600) rectangle (1.393,-3.840);
+  \fill[cCell] (1.393,-3.600) rectangle (2.321,-3.840);
+  \fill[cCell] (5.107,-3.600) rectangle (6.036,-3.840);
+  \fill[cCell] (8.821,-3.600) rectangle (9.750,-3.840);
+  \fill[cCell] (10.679,-3.600) rectangle (11.607,-3.840);
+  \fill[cCell] (11.607,-3.600) rectangle (12.536,-3.840);
+  \fill[cCell] (1.393,-3.840) rectangle (2.321,-4.080);
+  \fill[cCell] (3.250,-3.840) rectangle (4.179,-4.080);
+  \fill[cCell] (5.107,-3.840) rectangle (6.036,-4.080);
+  \fill[cCell] (12.536,-3.840) rectangle (13.464,-4.080);
+  \fill[cCell] (5.107,-4.080) rectangle (6.036,-4.320);
+  \fill[cCell] (6.036,-4.080) rectangle (6.964,-4.320);
+  \fill[cCell] (6.964,-4.080) rectangle (7.893,-4.320);
+  \fill[cCell] (7.893,-4.080) rectangle (8.821,-4.320);
+  \fill[cCell] (12.536,-4.080) rectangle (13.464,-4.320);
+  \fill[cCell] (1.393,-4.320) rectangle (2.321,-4.560);
+  \fill[cCell] (4.179,-4.320) rectangle (5.107,-4.560);
+  \fill[cCell] (5.107,-4.320) rectangle (6.036,-4.560);
+  \fill[cCell] (8.821,-4.320) rectangle (9.750,-4.560);
+  \fill[cCell] (9.750,-4.320) rectangle (10.679,-4.560);
+  \fill[cCell] (12.536,-4.320) rectangle (13.464,-4.560);
+  \fill[cCell] (1.393,-4.560) rectangle (2.321,-4.800);
+  \fill[cCell] (2.321,-4.560) rectangle (3.250,-4.800);
+  \fill[cCell] (3.250,-4.560) rectangle (4.179,-4.800);
+  \fill[cCell] (4.179,-4.560) rectangle (5.107,-4.800);
+  \fill[cCell] (8.821,-4.560) rectangle (9.750,-4.800);
+  \fill[cCell] (10.679,-4.560) rectangle (11.607,-4.800);
+  \fill[cCell] (12.536,-4.560) rectangle (13.464,-4.800);
+  \fill[cCell] (-0.464,-4.800) rectangle (0.464,-5.040);
+  \fill[cCell] (2.321,-4.800) rectangle (3.250,-5.040);
+  \fill[cCell] (4.179,-4.800) rectangle (5.107,-5.040);
+  \fill[cCell] (5.107,-4.800) rectangle (6.036,-5.040);
+  \fill[cCell] (8.821,-4.800) rectangle (9.750,-5.040);
+  \fill[cCell] (11.607,-4.800) rectangle (12.536,-5.040);
+  \fill[cCell] (12.536,-4.800) rectangle (13.464,-5.040);
+  \fill[cCell] (3.250,-5.040) rectangle (4.179,-5.280);
+  \fill[cCell] (4.179,-5.040) rectangle (5.107,-5.280);
+  \fill[cCell] (6.036,-5.040) rectangle (6.964,-5.280);
+  \fill[cCell] (6.964,-5.040) rectangle (7.893,-5.280);
+  \fill[cCell] (7.893,-5.040) rectangle (8.821,-5.280);
+  \fill[cCell] (9.750,-5.040) rectangle (10.679,-5.280);
+  \fill[cCell] (10.679,-5.040) rectangle (11.607,-5.280);
+  \fill[cCell] (11.607,-5.040) rectangle (12.536,-5.280);
+  \fill[cCell] (12.536,-5.040) rectangle (13.464,-5.280);
+  \draw[cellframe] (-0.464,0.000) rectangle (13.464,-5.280);
+  \node[collab] at (0.000,-5.330) {a0};
+  \node[collab] at (0.929,-5.330) {a1};
+  \node[collab] at (1.857,-5.330) {a2};
+  \node[collab] at (2.786,-5.330) {a3};
+  \node[collab] at (3.714,-5.330) {a4};
+  \node[collab] at (4.643,-5.330) {a5};
+  \node[collab] at (5.571,-5.330) {a6};
+  \node[collab] at (6.500,-5.330) {a7};
+  \node[collab] at (7.429,-5.330) {a8};
+  \node[collab] at (8.357,-5.330) {a9};
+  \node[collab] at (9.286,-5.330) {a10};
+  \node[collab] at (10.214,-5.330) {a11};
+  \node[collab] at (11.143,-5.330) {a12};
+  \node[collab] at (12.071,-5.330) {a13};
+  \node[collab] at (13.000,-5.330) {a14};
+  \node[panellab] at (-1.150,-2.640) {data};
+  \node[attr] (lna0) at (0.000,0.950) {};
+  \node[attr] (lna1) at (0.929,0.950) {};
+  \node[attr] (lna2) at (1.857,0.950) {};
+  \node[attr] (lna3) at (2.786,0.950) {};
+  \node[attr] (lna4) at (3.714,0.950) {};
+  \node[attr] (lna5) at (4.643,0.950) {};
+  \node[attr] (lna6) at (5.571,0.950) {};
+  \node[attr] (lna7) at (6.500,0.950) {};
+  \node[attr] (lna8) at (7.429,0.950) {};
+  \node[attr] (lna9) at (8.357,0.950) {};
+  \node[attr] (lna10) at (9.286,0.950) {};
+  \node[attr] (lna11) at (10.214,0.950) {};
+  \node[attr] (lna12) at (11.143,0.950) {};
+  \node[attr] (lna13) at (12.071,0.950) {};
+  \node[attr] (lna14) at (13.000,0.950) {};
+  \node[panellab] at (-1.150,0.950) {learned};
+\end{tikzpicture}\end{center}
+\begin{center}\begin{tikzpicture}
+\begin{axis}[cltraj, xlabel={accepted move}, ylabel={total $L$ (bits)}]
+  \addplot[cLine] coordinates {(0,8023)};
+\end{axis}
+\end{tikzpicture}\end{center}
+\clearpage
+\section*{Planted two-level hierarchy}
+Four base concepts under two parents. Recovered, and compressed below the codelength of the generating model.\par\medskip
+\begin{center}\begin{tikzpicture}
+  \fill[cCell] (-0.433,-0.240) rectangle (0.433,-0.480);
+  \fill[cCell] (3.033,-0.240) rectangle (3.900,-0.480);
+  \fill[cCell] (4.767,-0.240) rectangle (5.633,-0.480);
+  \fill[cCell] (5.633,-0.240) rectangle (6.500,-0.480);
+  \fill[cCell] (0.433,-0.480) rectangle (1.300,-0.720);
+  \fill[cCell] (9.967,-0.480) rectangle (10.833,-0.720);
+  \fill[cCell] (10.833,-0.480) rectangle (11.700,-0.720);
+  \fill[cCell] (-0.433,-0.720) rectangle (0.433,-0.960);
+  \fill[cCell] (0.433,-0.720) rectangle (1.300,-0.960);
+  \fill[cCell] (3.033,-0.720) rectangle (3.900,-0.960);
+  \fill[cCell] (4.767,-0.720) rectangle (5.633,-0.960);
+  \fill[cCell] (5.633,-0.720) rectangle (6.500,-0.960);
+  \fill[cCell] (9.967,-0.720) rectangle (10.833,-0.960);
+  \fill[cCell] (10.833,-0.720) rectangle (11.700,-0.960);
+  \fill[cCell] (-0.433,-0.960) rectangle (0.433,-1.200);
+  \fill[cCell] (0.433,-0.960) rectangle (1.300,-1.200);
+  \fill[cCell] (3.033,-0.960) rectangle (3.900,-1.200);
+  \fill[cCell] (4.767,-0.960) rectangle (5.633,-1.200);
+  \fill[cCell] (5.633,-0.960) rectangle (6.500,-1.200);
+  \fill[cCell] (9.967,-0.960) rectangle (10.833,-1.200);
+  \fill[cCell] (10.833,-0.960) rectangle (11.700,-1.200);
+  \fill[cCell] (-0.433,-1.200) rectangle (0.433,-1.440);
+  \fill[cCell] (0.433,-1.200) rectangle (1.300,-1.440);
+  \fill[cCell] (3.033,-1.200) rectangle (3.900,-1.440);
+  \fill[cCell] (4.767,-1.200) rectangle (5.633,-1.440);
+  \fill[cCell] (5.633,-1.200) rectangle (6.500,-1.440);
+  \fill[cCell] (9.967,-1.200) rectangle (10.833,-1.440);
+  \fill[cCell] (10.833,-1.200) rectangle (11.700,-1.440);
+  \fill[cCell] (-0.433,-1.440) rectangle (0.433,-1.680);
+  \fill[cCell] (0.433,-1.440) rectangle (1.300,-1.680);
+  \fill[cCell] (3.033,-1.440) rectangle (3.900,-1.680);
+  \fill[cCell] (4.767,-1.440) rectangle (5.633,-1.680);
+  \fill[cCell] (5.633,-1.440) rectangle (6.500,-1.680);
+  \fill[cCell] (9.967,-1.440) rectangle (10.833,-1.680);
+  \fill[cCell] (10.833,-1.440) rectangle (11.700,-1.680);
+  \fill[cCell] (-0.433,-1.680) rectangle (0.433,-1.920);
+  \fill[cCell] (0.433,-1.680) rectangle (1.300,-1.920);
+  \fill[cCell] (3.033,-1.680) rectangle (3.900,-1.920);
+  \fill[cCell] (4.767,-1.680) rectangle (5.633,-1.920);
+  \fill[cCell] (5.633,-1.680) rectangle (6.500,-1.920);
+  \fill[cCell] (9.967,-1.680) rectangle (10.833,-1.920);
+  \fill[cCell] (10.833,-1.680) rectangle (11.700,-1.920);
+  \fill[cCell] (-0.433,-1.920) rectangle (0.433,-2.160);
+  \fill[cCell] (0.433,-1.920) rectangle (1.300,-2.160);
+  \fill[cCell] (3.033,-1.920) rectangle (3.900,-2.160);
+  \fill[cCell] (4.767,-1.920) rectangle (5.633,-2.160);
+  \fill[cCell] (5.633,-1.920) rectangle (6.500,-2.160);
+  \fill[cCell] (9.967,-1.920) rectangle (10.833,-2.160);
+  \fill[cCell] (10.833,-1.920) rectangle (11.700,-2.160);
+  \fill[cCell] (2.167,-2.160) rectangle (3.033,-2.400);
+  \fill[cCell] (6.500,-2.160) rectangle (7.367,-2.400);
+  \fill[cCell] (8.233,-2.160) rectangle (9.100,-2.400);
+  \fill[cCell] (11.700,-2.160) rectangle (12.567,-2.400);
+  \fill[cCell] (-0.433,-2.400) rectangle (0.433,-2.640);
+  \fill[cCell] (0.433,-2.400) rectangle (1.300,-2.640);
+  \fill[cCell] (2.167,-2.400) rectangle (3.033,-2.640);
+  \fill[cCell] (3.033,-2.400) rectangle (3.900,-2.640);
+  \fill[cCell] (4.767,-2.400) rectangle (5.633,-2.640);
+  \fill[cCell] (5.633,-2.400) rectangle (6.500,-2.640);
+  \fill[cCell] (6.500,-2.400) rectangle (7.367,-2.640);
+  \fill[cCell] (8.233,-2.400) rectangle (9.100,-2.640);
+  \fill[cCell] (9.967,-2.400) rectangle (10.833,-2.640);
+  \fill[cCell] (10.833,-2.400) rectangle (11.700,-2.640);
+  \fill[cCell] (11.700,-2.400) rectangle (12.567,-2.640);
+  \fill[cCell] (3.900,-2.640) rectangle (4.767,-2.880);
+  \fill[cCell] (7.367,-2.640) rectangle (8.233,-2.880);
+  \fill[cCell] (9.100,-2.640) rectangle (9.967,-2.880);
+  \fill[cCell] (12.567,-2.640) rectangle (13.433,-2.880);
+  \fill[cCell] (-0.433,-2.880) rectangle (0.433,-3.120);
+  \fill[cCell] (0.433,-2.880) rectangle (1.300,-3.120);
+  \fill[cCell] (3.033,-2.880) rectangle (3.900,-3.120);
+  \fill[cCell] (3.900,-2.880) rectangle (4.767,-3.120);
+  \fill[cCell] (4.767,-2.880) rectangle (5.633,-3.120);
+  \fill[cCell] (5.633,-2.880) rectangle (6.500,-3.120);
+  \fill[cCell] (7.367,-2.880) rectangle (8.233,-3.120);
+  \fill[cCell] (9.100,-2.880) rectangle (9.967,-3.120);
+  \fill[cCell] (9.967,-2.880) rectangle (10.833,-3.120);
+  \fill[cCell] (10.833,-2.880) rectangle (11.700,-3.120);
+  \fill[cCell] (12.567,-2.880) rectangle (13.433,-3.120);
+  \fill[cCell] (2.167,-3.120) rectangle (3.033,-3.360);
+  \fill[cCell] (3.900,-3.120) rectangle (4.767,-3.360);
+  \fill[cCell] (6.500,-3.120) rectangle (7.367,-3.360);
+  \fill[cCell] (7.367,-3.120) rectangle (8.233,-3.360);
+  \fill[cCell] (8.233,-3.120) rectangle (9.100,-3.360);
+  \fill[cCell] (9.100,-3.120) rectangle (9.967,-3.360);
+  \fill[cCell] (11.700,-3.120) rectangle (12.567,-3.360);
+  \fill[cCell] (12.567,-3.120) rectangle (13.433,-3.360);
+  \fill[cCell] (2.167,-3.360) rectangle (3.033,-3.600);
+  \fill[cCell] (3.900,-3.360) rectangle (4.767,-3.600);
+  \fill[cCell] (6.500,-3.360) rectangle (7.367,-3.600);
+  \fill[cCell] (7.367,-3.360) rectangle (8.233,-3.600);
+  \fill[cCell] (8.233,-3.360) rectangle (9.100,-3.600);
+  \fill[cCell] (9.100,-3.360) rectangle (9.967,-3.600);
+  \fill[cCell] (11.700,-3.360) rectangle (12.567,-3.600);
+  \fill[cCell] (12.567,-3.360) rectangle (13.433,-3.600);
+  \fill[cCell] (2.167,-3.600) rectangle (3.033,-3.840);
+  \fill[cCell] (3.900,-3.600) rectangle (4.767,-3.840);
+  \fill[cCell] (6.500,-3.600) rectangle (7.367,-3.840);
+  \fill[cCell] (7.367,-3.600) rectangle (8.233,-3.840);
+  \fill[cCell] (8.233,-3.600) rectangle (9.100,-3.840);
+  \fill[cCell] (9.100,-3.600) rectangle (9.967,-3.840);
+  \fill[cCell] (11.700,-3.600) rectangle (12.567,-3.840);
+  \fill[cCell] (12.567,-3.600) rectangle (13.433,-3.840);
+  \fill[cCell] (2.167,-3.840) rectangle (3.033,-4.080);
+  \fill[cCell] (3.900,-3.840) rectangle (4.767,-4.080);
+  \fill[cCell] (6.500,-3.840) rectangle (7.367,-4.080);
+  \fill[cCell] (7.367,-3.840) rectangle (8.233,-4.080);
+  \fill[cCell] (8.233,-3.840) rectangle (9.100,-4.080);
+  \fill[cCell] (9.100,-3.840) rectangle (9.967,-4.080);
+  \fill[cCell] (11.700,-3.840) rectangle (12.567,-4.080);
+  \fill[cCell] (12.567,-3.840) rectangle (13.433,-4.080);
+  \fill[cCell] (2.167,-4.080) rectangle (3.033,-4.320);
+  \fill[cCell] (3.900,-4.080) rectangle (4.767,-4.320);
+  \fill[cCell] (6.500,-4.080) rectangle (7.367,-4.320);
+  \fill[cCell] (7.367,-4.080) rectangle (8.233,-4.320);
+  \fill[cCell] (8.233,-4.080) rectangle (9.100,-4.320);
+  \fill[cCell] (9.100,-4.080) rectangle (9.967,-4.320);
+  \fill[cCell] (11.700,-4.080) rectangle (12.567,-4.320);
+  \fill[cCell] (12.567,-4.080) rectangle (13.433,-4.320);
+  \fill[cCell] (2.167,-4.320) rectangle (3.033,-4.560);
+  \fill[cCell] (3.900,-4.320) rectangle (4.767,-4.560);
+  \fill[cCell] (6.500,-4.320) rectangle (7.367,-4.560);
+  \fill[cCell] (7.367,-4.320) rectangle (8.233,-4.560);
+  \fill[cCell] (8.233,-4.320) rectangle (9.100,-4.560);
+  \fill[cCell] (9.100,-4.320) rectangle (9.967,-4.560);
+  \fill[cCell] (11.700,-4.320) rectangle (12.567,-4.560);
+  \fill[cCell] (12.567,-4.320) rectangle (13.433,-4.560);
+  \fill[cCell] (0.433,-4.560) rectangle (1.300,-4.800);
+  \fill[cCell] (2.167,-4.560) rectangle (3.033,-4.800);
+  \fill[cCell] (3.900,-4.560) rectangle (4.767,-4.800);
+  \fill[cCell] (6.500,-4.560) rectangle (7.367,-4.800);
+  \fill[cCell] (7.367,-4.560) rectangle (8.233,-4.800);
+  \fill[cCell] (8.233,-4.560) rectangle (9.100,-4.800);
+  \fill[cCell] (9.100,-4.560) rectangle (9.967,-4.800);
+  \fill[cCell] (9.967,-4.560) rectangle (10.833,-4.800);
+  \fill[cCell] (10.833,-4.560) rectangle (11.700,-4.800);
+  \fill[cCell] (11.700,-4.560) rectangle (12.567,-4.800);
+  \fill[cCell] (12.567,-4.560) rectangle (13.433,-4.800);
+  \fill[cCell] (-0.433,-4.800) rectangle (0.433,-5.040);
+  \fill[cCell] (0.433,-4.800) rectangle (1.300,-5.040);
+  \fill[cCell] (2.167,-4.800) rectangle (3.033,-5.040);
+  \fill[cCell] (3.033,-4.800) rectangle (3.900,-5.040);
+  \fill[cCell] (3.900,-4.800) rectangle (4.767,-5.040);
+  \fill[cCell] (4.767,-4.800) rectangle (5.633,-5.040);
+  \fill[cCell] (5.633,-4.800) rectangle (6.500,-5.040);
+  \fill[cCell] (6.500,-4.800) rectangle (7.367,-5.040);
+  \fill[cCell] (7.367,-4.800) rectangle (8.233,-5.040);
+  \fill[cCell] (8.233,-4.800) rectangle (9.100,-5.040);
+  \fill[cCell] (9.100,-4.800) rectangle (9.967,-5.040);
+  \fill[cCell] (9.967,-4.800) rectangle (10.833,-5.040);
+  \fill[cCell] (10.833,-4.800) rectangle (11.700,-5.040);
+  \fill[cCell] (11.700,-4.800) rectangle (12.567,-5.040);
+  \fill[cCell] (12.567,-4.800) rectangle (13.433,-5.040);
+  \fill[cCell] (-0.433,-5.040) rectangle (0.433,-5.280);
+  \fill[cCell] (0.433,-5.040) rectangle (1.300,-5.280);
+  \fill[cCell] (2.167,-5.040) rectangle (3.033,-5.280);
+  \fill[cCell] (3.033,-5.040) rectangle (3.900,-5.280);
+  \fill[cCell] (3.900,-5.040) rectangle (4.767,-5.280);
+  \fill[cCell] (4.767,-5.040) rectangle (5.633,-5.280);
+  \fill[cCell] (5.633,-5.040) rectangle (6.500,-5.280);
+  \fill[cCell] (6.500,-5.040) rectangle (7.367,-5.280);
+  \fill[cCell] (7.367,-5.040) rectangle (8.233,-5.280);
+  \fill[cCell] (8.233,-5.040) rectangle (9.100,-5.280);
+  \fill[cCell] (9.100,-5.040) rectangle (9.967,-5.280);
+  \fill[cCell] (9.967,-5.040) rectangle (10.833,-5.280);
+  \fill[cCell] (10.833,-5.040) rectangle (11.700,-5.280);
+  \fill[cCell] (11.700,-5.040) rectangle (12.567,-5.280);
+  \fill[cCell] (12.567,-5.040) rectangle (13.433,-5.280);
+  \draw[cellframe] (-0.433,0.000) rectangle (13.433,-5.280);
+  \node[collab] at (0.000,-5.330) {a0};
+  \node[collab] at (0.867,-5.330) {a1};
+  \node[collab] at (1.733,-5.330) {a2};
+  \node[collab] at (2.600,-5.330) {a3};
+  \node[collab] at (3.467,-5.330) {a4};
+  \node[collab] at (4.333,-5.330) {a5};
+  \node[collab] at (5.200,-5.330) {a6};
+  \node[collab] at (6.067,-5.330) {a7};
+  \node[collab] at (6.933,-5.330) {a8};
+  \node[collab] at (7.800,-5.330) {a9};
+  \node[collab] at (8.667,-5.330) {a10};
+  \node[collab] at (9.533,-5.330) {a11};
+  \node[collab] at (10.400,-5.330) {a12};
+  \node[collab] at (11.267,-5.330) {a13};
+  \node[collab] at (12.133,-5.330) {a14};
+  \node[collab] at (13.000,-5.330) {a15};
+  \node[panellab] at (-1.150,-2.640) {data};
+  \node[attr] (lna0) at (0.000,0.950) {};
+  \node[attr] (lna1) at (0.867,0.950) {};
+  \node[attr] (lna2) at (1.733,0.950) {};
+  \node[attr] (lna3) at (2.600,0.950) {};
+  \node[attr] (lna4) at (3.467,0.950) {};
+  \node[attr] (lna5) at (4.333,0.950) {};
+  \node[attr] (lna6) at (5.200,0.950) {};
+  \node[attr] (lna7) at (6.067,0.950) {};
+  \node[attr] (lna8) at (6.933,0.950) {};
+  \node[attr] (lna9) at (7.800,0.950) {};
+  \node[attr] (lna10) at (8.667,0.950) {};
+  \node[attr] (lna11) at (9.533,0.950) {};
+  \node[attr] (lna12) at (10.400,0.950) {};
+  \node[attr] (lna13) at (11.267,0.950) {};
+  \node[attr] (lna14) at (12.133,0.950) {};
+  \node[attr] (lna15) at (13.000,0.950) {};
+  \node[concept, fill=cConcOn] (lnc18) at (3.683,2.000) {\tiny C18};
+  \node[concept, fill=cConcOn] (lnc20) at (7.511,2.000) {\tiny C20};
+  \node[concept] (lnc23) at (8.291,2.000) {\tiny C23};
+  \node[concept] (lnc26) at (9.071,2.000) {\tiny C26};
+  \node[concept, fill=cConcOn] (lnc41) at (8.125,3.050) {\tiny C41};
+  \draw[edge] (lnc18) -- (lna0);
+  \draw[edge] (lnc18) -- (lna4);
+  \draw[edge] (lnc18) -- (lna6);
+  \draw[edge] (lnc18) -- (lna7);
+  \draw[edge] (lnc20) -- (lna1);
+  \draw[edge] (lnc20) -- (lna12);
+  \draw[edge] (lnc20) -- (lna13);
+  \draw[edge] (lnc23) -- (lna8);
+  \draw[edge] (lnc23) -- (lna10);
+  \draw[edge] (lnc23) -- (lna3);
+  \draw[edge] (lnc23) -- (lna14);
+  \draw[edge] (lnc26) -- (lna9);
+  \draw[edge] (lnc26) -- (lna11);
+  \draw[edge] (lnc26) -- (lna5);
+  \draw[edge] (lnc26) -- (lna15);
+  \draw[edge] (lnc41) -- (lnc26);
+  \draw[edge] (lnc41) -- (lnc23);
+  \node[panellab] at (-1.150,2.000) {learned};
+  \node[attr] (pla0) at (0.000,4.550) {};
+  \node[attr] (pla1) at (0.867,4.550) {};
+  \node[attr] (pla2) at (1.733,4.550) {};
+  \node[attr] (pla3) at (2.600,4.550) {};
+  \node[attr] (pla4) at (3.467,4.550) {};
+  \node[attr] (pla5) at (4.333,4.550) {};
+  \node[attr] (pla6) at (5.200,4.550) {};
+  \node[attr] (pla7) at (6.067,4.550) {};
+  \node[attr] (pla8) at (6.933,4.550) {};
+  \node[attr] (pla9) at (7.800,4.550) {};
+  \node[attr] (pla10) at (8.667,4.550) {};
+  \node[attr] (pla11) at (9.533,4.550) {};
+  \node[attr] (pla12) at (10.400,4.550) {};
+  \node[attr] (pla13) at (11.267,4.550) {};
+  \node[attr] (pla14) at (12.133,4.550) {};
+  \node[attr] (pla15) at (13.000,4.550) {};
+  \node[concept] (plc16) at (8.291,5.600) {\tiny C16};
+  \node[concept] (plc17) at (7.511,5.600) {\tiny C17};
+  \node[concept] (plc18) at (3.683,5.600) {\tiny C18};
+  \node[concept] (plc19) at (9.071,5.600) {\tiny C19};
+  \node[concept] (plc20) at (8.125,6.650) {\tiny C20};
+  \node[concept] (plc21) at (5.324,6.650) {\tiny C21};
+  \draw[edge] (plc16) -- (pla8);
+  \draw[edge] (plc16) -- (pla10);
+  \draw[edge] (plc16) -- (pla3);
+  \draw[edge] (plc16) -- (pla14);
+  \draw[edge] (plc17) -- (pla1);
+  \draw[edge] (plc17) -- (pla12);
+  \draw[edge] (plc17) -- (pla13);
+  \draw[edge] (plc18) -- (pla0);
+  \draw[edge] (plc18) -- (pla4);
+  \draw[edge] (plc18) -- (pla6);
+  \draw[edge] (plc18) -- (pla7);
+  \draw[edge] (plc19) -- (pla9);
+  \draw[edge] (plc19) -- (pla11);
+  \draw[edge] (plc19) -- (pla5);
+  \draw[edge] (plc19) -- (pla15);
+  \draw[edge] (plc20) -- (plc16);
+  \draw[edge] (plc20) -- (plc19);
+  \draw[edge] (plc21) -- (plc17);
+  \draw[edge] (plc21) -- (plc18);
+  \node[panellab] at (-1.150,5.600) {planted};
+\end{tikzpicture}\end{center}
+\medskip\noindent\textit{Rent} (bits lost if a node were removed; node colour):\par\begin{center}\begin{tikzpicture}
+  \node[attr] (rta0) at (0.000,0.000) {};
+  \node[attr] (rta1) at (0.867,0.000) {};
+  \node[attr] (rta2) at (1.733,0.000) {};
+  \node[attr] (rta3) at (2.600,0.000) {};
+  \node[attr] (rta4) at (3.467,0.000) {};
+  \node[attr] (rta5) at (4.333,0.000) {};
+  \node[attr] (rta6) at (5.200,0.000) {};
+  \node[attr] (rta7) at (6.067,0.000) {};
+  \node[attr] (rta8) at (6.933,0.000) {};
+  \node[attr] (rta9) at (7.800,0.000) {};
+  \node[attr] (rta10) at (8.667,0.000) {};
+  \node[attr] (rta11) at (9.533,0.000) {};
+  \node[attr] (rta12) at (10.400,0.000) {};
+  \node[attr] (rta13) at (11.267,0.000) {};
+  \node[attr] (rta14) at (12.133,0.000) {};
+  \node[attr] (rta15) at (13.000,0.000) {};
+  \definecolor{rcrt18}{rgb}{0.000,0.271,0.161}
+  \node[concept, fill=rcrt18, text=white] (rtc18) at (3.683,1.050) {\tiny C18};
+  \definecolor{rcrt20}{rgb}{0.216,0.620,0.331}
+  \node[concept, fill=rcrt20, text=white] (rtc20) at (7.511,1.050) {\tiny C20};
+  \definecolor{rcrt23}{rgb}{0.493,0.786,0.484}
+  \node[concept, fill=rcrt23, text=black] (rtc23) at (8.291,1.050) {\tiny C23};
+  \definecolor{rcrt26}{rgb}{0.487,0.784,0.481}
+  \node[concept, fill=rcrt26, text=black] (rtc26) at (9.071,1.050) {\tiny C26};
+  \definecolor{rcrt41}{rgb}{0.997,0.999,0.882}
+  \node[concept, fill=rcrt41, text=black] (rtc41) at (8.125,2.100) {\tiny C41};
+  \draw[edge] (rtc18) -- (rta0);
+  \draw[edge] (rtc18) -- (rta4);
+  \draw[edge] (rtc18) -- (rta6);
+  \draw[edge] (rtc18) -- (rta7);
+  \draw[edge] (rtc20) -- (rta1);
+  \draw[edge] (rtc20) -- (rta12);
+  \draw[edge] (rtc20) -- (rta13);
+  \draw[edge] (rtc23) -- (rta8);
+  \draw[edge] (rtc23) -- (rta10);
+  \draw[edge] (rtc23) -- (rta3);
+  \draw[edge] (rtc23) -- (rta14);
+  \draw[edge] (rtc26) -- (rta9);
+  \draw[edge] (rtc26) -- (rta11);
+  \draw[edge] (rtc26) -- (rta5);
+  \draw[edge] (rtc26) -- (rta15);
+  \draw[edge] (rtc41) -- (rtc26);
+  \draw[edge] (rtc41) -- (rtc23);
+  \node[rentval] at (3.683,0.710) {4477\,b};
+  \node[rentval] at (7.511,0.710) {2979\,b};
+  \node[rentval] at (8.291,0.710) {2178\,b};
+  \node[rentval] at (9.071,0.710) {2196\,b};
+  \node[rentval] at (8.125,1.760) {54\,b};
+  \definecolor{cb0}{rgb}{1.000,1.000,0.898}
+  \fill[cb0] (13.600,0.000) rectangle (14.050,0.087);
+  \definecolor{cb1}{rgb}{0.990,0.996,0.844}
+  \fill[cb1] (13.600,0.087) rectangle (14.050,0.175);
+  \definecolor{cb2}{rgb}{0.979,0.992,0.784}
+  \fill[cb2] (13.600,0.175) rectangle (14.050,0.263);
+  \definecolor{cb3}{rgb}{0.968,0.988,0.725}
+  \fill[cb3] (13.600,0.263) rectangle (14.050,0.350);
+  \definecolor{cb4}{rgb}{0.931,0.973,0.698}
+  \fill[cb4] (13.600,0.350) rectangle (14.050,0.438);
+  \definecolor{cb5}{rgb}{0.891,0.957,0.668}
+  \fill[cb5] (13.600,0.438) rectangle (14.050,0.525);
+  \definecolor{cb6}{rgb}{0.850,0.941,0.639}
+  \fill[cb6] (13.600,0.525) rectangle (14.050,0.613);
+  \definecolor{cb7}{rgb}{0.795,0.917,0.613}
+  \fill[cb7] (13.600,0.613) rectangle (14.050,0.700);
+  \definecolor{cb8}{rgb}{0.736,0.892,0.584}
+  \fill[cb8] (13.600,0.700) rectangle (14.050,0.788);
+  \definecolor{cb9}{rgb}{0.676,0.866,0.556}
+  \fill[cb9] (13.600,0.788) rectangle (14.050,0.875);
+  \definecolor{cb10}{rgb}{0.611,0.837,0.530}
+  \fill[cb10] (13.600,0.875) rectangle (14.050,0.963);
+  \definecolor{cb11}{rgb}{0.539,0.806,0.502}
+  \fill[cb11] (13.600,0.963) rectangle (14.050,1.050);
+  \definecolor{cb12}{rgb}{0.467,0.775,0.473}
+  \fill[cb12] (13.600,1.050) rectangle (14.050,1.137);
+  \definecolor{cb13}{rgb}{0.400,0.742,0.438}
+  \fill[cb13] (13.600,1.137) rectangle (14.050,1.225);
+  \definecolor{cb14}{rgb}{0.325,0.705,0.400}
+  \fill[cb14] (13.600,1.225) rectangle (14.050,1.312);
+  \definecolor{cb15}{rgb}{0.253,0.668,0.363}
+  \fill[cb15] (13.600,1.312) rectangle (14.050,1.400);
+  \definecolor{cb16}{rgb}{0.216,0.620,0.331}
+  \fill[cb16] (13.600,1.400) rectangle (14.050,1.488);
+  \definecolor{cb17}{rgb}{0.175,0.567,0.296}
+  \fill[cb17] (13.600,1.488) rectangle (14.050,1.575);
+  \definecolor{cb18}{rgb}{0.134,0.515,0.262}
+  \fill[cb18] (13.600,1.575) rectangle (14.050,1.663);
+  \definecolor{cb19}{rgb}{0.091,0.481,0.247}
+  \fill[cb19] (13.600,1.663) rectangle (14.050,1.750);
+  \definecolor{cb20}{rgb}{0.044,0.443,0.231}
+  \fill[cb20] (13.600,1.750) rectangle (14.050,1.838);
+  \definecolor{cb21}{rgb}{0.000,0.404,0.214}
+  \fill[cb21] (13.600,1.838) rectangle (14.050,1.925);
+  \definecolor{cb22}{rgb}{0.000,0.361,0.197}
+  \fill[cb22] (13.600,1.925) rectangle (14.050,2.013);
+  \definecolor{cb23}{rgb}{0.000,0.314,0.178}
+  \fill[cb23] (13.600,2.013) rectangle (14.050,2.100);
+  \draw[cellframe] (13.600,0.000) rectangle (14.050,2.100);
+  \node[cblab] at (14.150,0.000) {0};
+  \node[cblab] at (14.150,2.100) {4477\,b};
+\end{tikzpicture}\end{center}
+\begin{center}\begin{tikzpicture}
+\begin{axis}[cltraj, xlabel={accepted move}, ylabel={total $L$ (bits)}]
+  \addplot[cLine] coordinates {(0,22938) (1,21933) (2,20849) (3,19825) (4,18864) (5,17868) (6,16891) (7,15849) (8,14907) (9,13977) (10,13016) (11,12151) (12,12095) (13,12036) (14,11986) (15,11943) (16,11900) (17,11889) (18,11879) (19,11834) (20,11792) (21,11752) (22,11712) (23,11702) (24,11690) (25,11665) (26,11649) (27,11633) (28,11622) (29,11611) (30,11601) (31,11593) (32,10996) (33,10957) (34,10942) (35,10927) (36,10912) (37,10896) (38,10875) (39,10855) (40,10834) (41,10814) (42,10794) (43,10774) (44,10757) (45,10737) (46,10718) (47,10700) (48,10681) (49,10678)};
+  \addplot[cPlanted, domain=0:49] {11555};
+  \addlegendentry{learned $L$} \addlegendentry{planted $L$}
+\end{axis}
+\begin{axis}[cldelta, xlabel={accepted move}, ylabel={$\Delta L$ (bits)}]
+  \addplot[ybar, bar width=3pt, draw=cAmberE, fill=cGood] coordinates {(0,-1005) (1,-1084) (2,-1023) (3,-961) (4,-996) (5,-978) (6,-1042) (7,-942) (8,-929) (9,-961) (10,-865) (11,-56) (12,-59) (13,-50) (14,-43) (15,-43) (16,-10) (17,-10) (18,-45) (19,-42) (20,-40) (21,-39) (22,-10) (23,-12) (24,-25) (25,-16) (26,-16) (27,-11) (28,-11) (29,-10) (30,-8) (31,-597) (32,-39) (33,-15) (34,-15) (35,-15) (36,-15) (37,-21) (38,-21) (39,-20) (40,-20) (41,-20) (42,-20) (43,-17) (44,-20) (45,-20) (46,-17) (47,-19) (48,-3)};
+\end{axis}
+\end{tikzpicture}\end{center}
+\clearpage
+\section*{Planted three-level hierarchy}
+Base~$\to$~mid~$\to$~top. All concepts recovered in three tiers that align with the planted ones column-for-column; base concepts carry most of the rent.\par\medskip
+\begin{center}\begin{tikzpicture}
+  \fill[cCell] (2.466,-0.240) rectangle (2.914,-0.480);
+  \fill[cCell] (6.500,-0.240) rectangle (6.948,-0.480);
+  \fill[cCell] (6.948,-0.240) rectangle (7.397,-0.480);
+  \fill[cCell] (10.086,-0.240) rectangle (10.534,-0.480);
+  \fill[cCell] (2.017,-0.480) rectangle (2.466,-0.720);
+  \fill[cCell] (8.741,-0.480) rectangle (9.190,-0.720);
+  \fill[cCell] (10.983,-0.480) rectangle (11.431,-0.720);
+  \fill[cCell] (-0.224,-0.720) rectangle (0.224,-0.960);
+  \fill[cCell] (3.810,-0.720) rectangle (4.259,-0.960);
+  \fill[cCell] (5.155,-0.720) rectangle (5.603,-0.960);
+  \fill[cCell] (7.845,-0.720) rectangle (8.293,-0.960);
+  \fill[cCell] (8.293,-0.720) rectangle (8.741,-0.960);
+  \fill[cCell] (9.190,-0.720) rectangle (9.638,-0.960);
+  \fill[cCell] (11.431,-0.720) rectangle (11.879,-0.960);
+  \fill[cCell] (2.017,-0.960) rectangle (2.466,-1.200);
+  \fill[cCell] (5.155,-0.960) rectangle (5.603,-1.200);
+  \fill[cCell] (7.845,-0.960) rectangle (8.293,-1.200);
+  \fill[cCell] (8.741,-0.960) rectangle (9.190,-1.200);
+  \fill[cCell] (9.190,-0.960) rectangle (9.638,-1.200);
+  \fill[cCell] (10.983,-0.960) rectangle (11.431,-1.200);
+  \fill[cCell] (11.431,-0.960) rectangle (11.879,-1.200);
+  \fill[cCell] (1.121,-1.200) rectangle (1.569,-1.440);
+  \fill[cCell] (4.707,-1.200) rectangle (5.155,-1.440);
+  \fill[cCell] (6.052,-1.200) rectangle (6.500,-1.440);
+  \fill[cCell] (11.879,-1.200) rectangle (12.328,-1.440);
+  \fill[cCell] (-0.224,-1.440) rectangle (0.224,-1.680);
+  \fill[cCell] (1.121,-1.440) rectangle (1.569,-1.680);
+  \fill[cCell] (3.810,-1.440) rectangle (4.259,-1.680);
+  \fill[cCell] (4.707,-1.440) rectangle (5.155,-1.680);
+  \fill[cCell] (6.052,-1.440) rectangle (6.500,-1.680);
+  \fill[cCell] (8.293,-1.440) rectangle (8.741,-1.680);
+  \fill[cCell] (11.879,-1.440) rectangle (12.328,-1.680);
+  \fill[cCell] (-0.224,-1.680) rectangle (0.224,-1.920);
+  \fill[cCell] (1.121,-1.680) rectangle (1.569,-1.920);
+  \fill[cCell] (2.017,-1.680) rectangle (2.466,-1.920);
+  \fill[cCell] (3.810,-1.680) rectangle (4.259,-1.920);
+  \fill[cCell] (4.707,-1.680) rectangle (5.155,-1.920);
+  \fill[cCell] (5.155,-1.680) rectangle (5.603,-1.920);
+  \fill[cCell] (6.052,-1.680) rectangle (6.500,-1.920);
+  \fill[cCell] (7.845,-1.680) rectangle (8.293,-1.920);
+  \fill[cCell] (8.293,-1.680) rectangle (8.741,-1.920);
+  \fill[cCell] (8.741,-1.680) rectangle (9.190,-1.920);
+  \fill[cCell] (9.190,-1.680) rectangle (9.638,-1.920);
+  \fill[cCell] (10.983,-1.680) rectangle (11.431,-1.920);
+  \fill[cCell] (11.431,-1.680) rectangle (11.879,-1.920);
+  \fill[cCell] (11.879,-1.680) rectangle (12.328,-1.920);
+  \fill[cCell] (-0.224,-1.920) rectangle (0.224,-2.160);
+  \fill[cCell] (1.121,-1.920) rectangle (1.569,-2.160);
+  \fill[cCell] (2.017,-1.920) rectangle (2.466,-2.160);
+  \fill[cCell] (3.810,-1.920) rectangle (4.259,-2.160);
+  \fill[cCell] (4.707,-1.920) rectangle (5.155,-2.160);
+  \fill[cCell] (5.155,-1.920) rectangle (5.603,-2.160);
+  \fill[cCell] (6.052,-1.920) rectangle (6.500,-2.160);
+  \fill[cCell] (7.845,-1.920) rectangle (8.293,-2.160);
+  \fill[cCell] (8.293,-1.920) rectangle (8.741,-2.160);
+  \fill[cCell] (8.741,-1.920) rectangle (9.190,-2.160);
+  \fill[cCell] (9.190,-1.920) rectangle (9.638,-2.160);
+  \fill[cCell] (10.983,-1.920) rectangle (11.431,-2.160);
+  \fill[cCell] (11.431,-1.920) rectangle (11.879,-2.160);
+  \fill[cCell] (11.879,-1.920) rectangle (12.328,-2.160);
+  \fill[cCell] (-0.224,-2.160) rectangle (0.224,-2.400);
+  \fill[cCell] (1.121,-2.160) rectangle (1.569,-2.400);
+  \fill[cCell] (2.017,-2.160) rectangle (2.466,-2.400);
+  \fill[cCell] (3.810,-2.160) rectangle (4.259,-2.400);
+  \fill[cCell] (4.707,-2.160) rectangle (5.155,-2.400);
+  \fill[cCell] (5.155,-2.160) rectangle (5.603,-2.400);
+  \fill[cCell] (6.052,-2.160) rectangle (6.500,-2.400);
+  \fill[cCell] (7.845,-2.160) rectangle (8.293,-2.400);
+  \fill[cCell] (8.293,-2.160) rectangle (8.741,-2.400);
+  \fill[cCell] (8.741,-2.160) rectangle (9.190,-2.400);
+  \fill[cCell] (9.190,-2.160) rectangle (9.638,-2.400);
+  \fill[cCell] (10.983,-2.160) rectangle (11.431,-2.400);
+  \fill[cCell] (11.431,-2.160) rectangle (11.879,-2.400);
+  \fill[cCell] (11.879,-2.160) rectangle (12.328,-2.400);
+  \fill[cCell] (-0.224,-2.400) rectangle (0.224,-2.640);
+  \fill[cCell] (1.121,-2.400) rectangle (1.569,-2.640);
+  \fill[cCell] (2.017,-2.400) rectangle (2.466,-2.640);
+  \fill[cCell] (3.810,-2.400) rectangle (4.259,-2.640);
+  \fill[cCell] (4.707,-2.400) rectangle (5.155,-2.640);
+  \fill[cCell] (5.155,-2.400) rectangle (5.603,-2.640);
+  \fill[cCell] (6.052,-2.400) rectangle (6.500,-2.640);
+  \fill[cCell] (7.845,-2.400) rectangle (8.293,-2.640);
+  \fill[cCell] (8.293,-2.400) rectangle (8.741,-2.640);
+  \fill[cCell] (8.741,-2.400) rectangle (9.190,-2.640);
+  \fill[cCell] (9.190,-2.400) rectangle (9.638,-2.640);
+  \fill[cCell] (10.983,-2.400) rectangle (11.431,-2.640);
+  \fill[cCell] (11.431,-2.400) rectangle (11.879,-2.640);
+  \fill[cCell] (11.879,-2.400) rectangle (12.328,-2.640);
+  \fill[cCell] (0.672,-2.640) rectangle (1.121,-2.880);
+  \fill[cCell] (5.603,-2.640) rectangle (6.052,-2.880);
+  \fill[cCell] (9.638,-2.640) rectangle (10.086,-2.880);
+  \fill[cCell] (12.328,-2.640) rectangle (12.776,-2.880);
+  \fill[cCell] (0.672,-2.880) rectangle (1.121,-3.120);
+  \fill[cCell] (2.466,-2.880) rectangle (2.914,-3.120);
+  \fill[cCell] (5.603,-2.880) rectangle (6.052,-3.120);
+  \fill[cCell] (6.500,-2.880) rectangle (6.948,-3.120);
+  \fill[cCell] (6.948,-2.880) rectangle (7.397,-3.120);
+  \fill[cCell] (9.638,-2.880) rectangle (10.086,-3.120);
+  \fill[cCell] (10.086,-2.880) rectangle (10.534,-3.120);
+  \fill[cCell] (12.328,-2.880) rectangle (12.776,-3.120);
+  \fill[cCell] (-0.224,-3.120) rectangle (0.224,-3.360);
+  \fill[cCell] (0.672,-3.120) rectangle (1.121,-3.360);
+  \fill[cCell] (1.121,-3.120) rectangle (1.569,-3.360);
+  \fill[cCell] (3.810,-3.120) rectangle (4.259,-3.360);
+  \fill[cCell] (4.707,-3.120) rectangle (5.155,-3.360);
+  \fill[cCell] (5.603,-3.120) rectangle (6.052,-3.360);
+  \fill[cCell] (6.052,-3.120) rectangle (6.500,-3.360);
+  \fill[cCell] (8.293,-3.120) rectangle (8.741,-3.360);
+  \fill[cCell] (9.638,-3.120) rectangle (10.086,-3.360);
+  \fill[cCell] (11.879,-3.120) rectangle (12.328,-3.360);
+  \fill[cCell] (12.328,-3.120) rectangle (12.776,-3.360);
+  \fill[cCell] (0.224,-3.360) rectangle (0.672,-3.600);
+  \fill[cCell] (2.914,-3.360) rectangle (3.362,-3.600);
+  \fill[cCell] (3.362,-3.360) rectangle (3.810,-3.600);
+  \fill[cCell] (12.776,-3.360) rectangle (13.224,-3.600);
+  \fill[cCell] (0.224,-3.600) rectangle (0.672,-3.840);
+  \fill[cCell] (1.569,-3.600) rectangle (2.017,-3.840);
+  \fill[cCell] (2.914,-3.600) rectangle (3.362,-3.840);
+  \fill[cCell] (3.362,-3.600) rectangle (3.810,-3.840);
+  \fill[cCell] (4.259,-3.600) rectangle (4.707,-3.840);
+  \fill[cCell] (7.397,-3.600) rectangle (7.845,-3.840);
+  \fill[cCell] (10.534,-3.600) rectangle (10.983,-3.840);
+  \fill[cCell] (12.776,-3.600) rectangle (13.224,-3.840);
+  \fill[cCell] (-0.224,-3.840) rectangle (0.224,-4.080);
+  \fill[cCell] (0.224,-3.840) rectangle (0.672,-4.080);
+  \fill[cCell] (1.121,-3.840) rectangle (1.569,-4.080);
+  \fill[cCell] (1.569,-3.840) rectangle (2.017,-4.080);
+  \fill[cCell] (2.914,-3.840) rectangle (3.362,-4.080);
+  \fill[cCell] (3.362,-3.840) rectangle (3.810,-4.080);
+  \fill[cCell] (3.810,-3.840) rectangle (4.259,-4.080);
+  \fill[cCell] (4.259,-3.840) rectangle (4.707,-4.080);
+  \fill[cCell] (4.707,-3.840) rectangle (5.155,-4.080);
+  \fill[cCell] (6.052,-3.840) rectangle (6.500,-4.080);
+  \fill[cCell] (7.397,-3.840) rectangle (7.845,-4.080);
+  \fill[cCell] (8.293,-3.840) rectangle (8.741,-4.080);
+  \fill[cCell] (10.534,-3.840) rectangle (10.983,-4.080);
+  \fill[cCell] (11.879,-3.840) rectangle (12.328,-4.080);
+  \fill[cCell] (12.776,-3.840) rectangle (13.224,-4.080);
+  \fill[cCell] (0.224,-4.080) rectangle (0.672,-4.320);
+  \fill[cCell] (0.672,-4.080) rectangle (1.121,-4.320);
+  \fill[cCell] (1.569,-4.080) rectangle (2.017,-4.320);
+  \fill[cCell] (2.466,-4.080) rectangle (2.914,-4.320);
+  \fill[cCell] (2.914,-4.080) rectangle (3.362,-4.320);
+  \fill[cCell] (3.362,-4.080) rectangle (3.810,-4.320);
+  \fill[cCell] (4.259,-4.080) rectangle (4.707,-4.320);
+  \fill[cCell] (5.603,-4.080) rectangle (6.052,-4.320);
+  \fill[cCell] (6.500,-4.080) rectangle (6.948,-4.320);
+  \fill[cCell] (6.948,-4.080) rectangle (7.397,-4.320);
+  \fill[cCell] (7.397,-4.080) rectangle (7.845,-4.320);
+  \fill[cCell] (9.638,-4.080) rectangle (10.086,-4.320);
+  \fill[cCell] (10.086,-4.080) rectangle (10.534,-4.320);
+  \fill[cCell] (10.534,-4.080) rectangle (10.983,-4.320);
+  \fill[cCell] (12.328,-4.080) rectangle (12.776,-4.320);
+  \fill[cCell] (12.776,-4.080) rectangle (13.224,-4.320);
+  \fill[cCell] (0.224,-4.320) rectangle (0.672,-4.560);
+  \fill[cCell] (0.672,-4.320) rectangle (1.121,-4.560);
+  \fill[cCell] (1.569,-4.320) rectangle (2.017,-4.560);
+  \fill[cCell] (2.466,-4.320) rectangle (2.914,-4.560);
+  \fill[cCell] (2.914,-4.320) rectangle (3.362,-4.560);
+  \fill[cCell] (3.362,-4.320) rectangle (3.810,-4.560);
+  \fill[cCell] (4.259,-4.320) rectangle (4.707,-4.560);
+  \fill[cCell] (5.603,-4.320) rectangle (6.052,-4.560);
+  \fill[cCell] (6.500,-4.320) rectangle (6.948,-4.560);
+  \fill[cCell] (6.948,-4.320) rectangle (7.397,-4.560);
+  \fill[cCell] (7.397,-4.320) rectangle (7.845,-4.560);
+  \fill[cCell] (9.638,-4.320) rectangle (10.086,-4.560);
+  \fill[cCell] (10.086,-4.320) rectangle (10.534,-4.560);
+  \fill[cCell] (10.534,-4.320) rectangle (10.983,-4.560);
+  \fill[cCell] (12.328,-4.320) rectangle (12.776,-4.560);
+  \fill[cCell] (12.776,-4.320) rectangle (13.224,-4.560);
+  \fill[cCell] (0.224,-4.560) rectangle (0.672,-4.800);
+  \fill[cCell] (0.672,-4.560) rectangle (1.121,-4.800);
+  \fill[cCell] (1.569,-4.560) rectangle (2.017,-4.800);
+  \fill[cCell] (2.466,-4.560) rectangle (2.914,-4.800);
+  \fill[cCell] (2.914,-4.560) rectangle (3.362,-4.800);
+  \fill[cCell] (3.362,-4.560) rectangle (3.810,-4.800);
+  \fill[cCell] (4.259,-4.560) rectangle (4.707,-4.800);
+  \fill[cCell] (5.603,-4.560) rectangle (6.052,-4.800);
+  \fill[cCell] (6.500,-4.560) rectangle (6.948,-4.800);
+  \fill[cCell] (6.948,-4.560) rectangle (7.397,-4.800);
+  \fill[cCell] (7.397,-4.560) rectangle (7.845,-4.800);
+  \fill[cCell] (9.638,-4.560) rectangle (10.086,-4.800);
+  \fill[cCell] (10.086,-4.560) rectangle (10.534,-4.800);
+  \fill[cCell] (10.534,-4.560) rectangle (10.983,-4.800);
+  \fill[cCell] (12.328,-4.560) rectangle (12.776,-4.800);
+  \fill[cCell] (12.776,-4.560) rectangle (13.224,-4.800);
+  \fill[cCell] (0.224,-4.800) rectangle (0.672,-5.040);
+  \fill[cCell] (0.672,-4.800) rectangle (1.121,-5.040);
+  \fill[cCell] (1.569,-4.800) rectangle (2.017,-5.040);
+  \fill[cCell] (2.466,-4.800) rectangle (2.914,-5.040);
+  \fill[cCell] (2.914,-4.800) rectangle (3.362,-5.040);
+  \fill[cCell] (3.362,-4.800) rectangle (3.810,-5.040);
+  \fill[cCell] (4.259,-4.800) rectangle (4.707,-5.040);
+  \fill[cCell] (5.155,-4.800) rectangle (5.603,-5.040);
+  \fill[cCell] (5.603,-4.800) rectangle (6.052,-5.040);
+  \fill[cCell] (6.500,-4.800) rectangle (6.948,-5.040);
+  \fill[cCell] (6.948,-4.800) rectangle (7.397,-5.040);
+  \fill[cCell] (7.397,-4.800) rectangle (7.845,-5.040);
+  \fill[cCell] (7.845,-4.800) rectangle (8.293,-5.040);
+  \fill[cCell] (9.190,-4.800) rectangle (9.638,-5.040);
+  \fill[cCell] (9.638,-4.800) rectangle (10.086,-5.040);
+  \fill[cCell] (10.086,-4.800) rectangle (10.534,-5.040);
+  \fill[cCell] (10.534,-4.800) rectangle (10.983,-5.040);
+  \fill[cCell] (11.431,-4.800) rectangle (11.879,-5.040);
+  \fill[cCell] (12.328,-4.800) rectangle (12.776,-5.040);
+  \fill[cCell] (12.776,-4.800) rectangle (13.224,-5.040);
+  \fill[cCell] (-0.224,-5.040) rectangle (0.224,-5.280);
+  \fill[cCell] (0.224,-5.040) rectangle (0.672,-5.280);
+  \fill[cCell] (0.672,-5.040) rectangle (1.121,-5.280);
+  \fill[cCell] (1.121,-5.040) rectangle (1.569,-5.280);
+  \fill[cCell] (1.569,-5.040) rectangle (2.017,-5.280);
+  \fill[cCell] (2.017,-5.040) rectangle (2.466,-5.280);
+  \fill[cCell] (2.466,-5.040) rectangle (2.914,-5.280);
+  \fill[cCell] (2.914,-5.040) rectangle (3.362,-5.280);
+  \fill[cCell] (3.362,-5.040) rectangle (3.810,-5.280);
+  \fill[cCell] (3.810,-5.040) rectangle (4.259,-5.280);
+  \fill[cCell] (4.259,-5.040) rectangle (4.707,-5.280);
+  \fill[cCell] (4.707,-5.040) rectangle (5.155,-5.280);
+  \fill[cCell] (5.155,-5.040) rectangle (5.603,-5.280);
+  \fill[cCell] (5.603,-5.040) rectangle (6.052,-5.280);
+  \fill[cCell] (6.052,-5.040) rectangle (6.500,-5.280);
+  \fill[cCell] (6.500,-5.040) rectangle (6.948,-5.280);
+  \fill[cCell] (6.948,-5.040) rectangle (7.397,-5.280);
+  \fill[cCell] (7.397,-5.040) rectangle (7.845,-5.280);
+  \fill[cCell] (7.845,-5.040) rectangle (8.293,-5.280);
+  \fill[cCell] (8.293,-5.040) rectangle (8.741,-5.280);
+  \fill[cCell] (8.741,-5.040) rectangle (9.190,-5.280);
+  \fill[cCell] (9.190,-5.040) rectangle (9.638,-5.280);
+  \fill[cCell] (9.638,-5.040) rectangle (10.086,-5.280);
+  \fill[cCell] (10.086,-5.040) rectangle (10.534,-5.280);
+  \fill[cCell] (10.534,-5.040) rectangle (10.983,-5.280);
+  \fill[cCell] (10.983,-5.040) rectangle (11.431,-5.280);
+  \fill[cCell] (11.431,-5.040) rectangle (11.879,-5.280);
+  \fill[cCell] (11.879,-5.040) rectangle (12.328,-5.280);
+  \fill[cCell] (12.328,-5.040) rectangle (12.776,-5.280);
+  \fill[cCell] (12.776,-5.040) rectangle (13.224,-5.280);
+  \draw[cellframe] (-0.224,0.000) rectangle (13.224,-5.280);
+  \node[collab] at (0.000,-5.330) {a0};
+  \node[collab] at (0.448,-5.330) {a1};
+  \node[collab] at (0.897,-5.330) {a2};
+  \node[collab] at (1.345,-5.330) {a3};
+  \node[collab] at (1.793,-5.330) {a4};
+  \node[collab] at (2.241,-5.330) {a5};
+  \node[collab] at (2.690,-5.330) {a6};
+  \node[collab] at (3.138,-5.330) {a7};
+  \node[collab] at (3.586,-5.330) {a8};
+  \node[collab] at (4.034,-5.330) {a9};
+  \node[collab] at (4.483,-5.330) {a10};
+  \node[collab] at (4.931,-5.330) {a11};
+  \node[collab] at (5.379,-5.330) {a12};
+  \node[collab] at (5.828,-5.330) {a13};
+  \node[collab] at (6.276,-5.330) {a14};
+  \node[collab] at (6.724,-5.330) {a15};
+  \node[collab] at (7.172,-5.330) {a16};
+  \node[collab] at (7.621,-5.330) {a17};
+  \node[collab] at (8.069,-5.330) {a18};
+  \node[collab] at (8.517,-5.330) {a19};
+  \node[collab] at (8.966,-5.330) {a20};
+  \node[collab] at (9.414,-5.330) {a21};
+  \node[collab] at (9.862,-5.330) {a22};
+  \node[collab] at (10.310,-5.330) {a23};
+  \node[collab] at (10.759,-5.330) {a24};
+  \node[collab] at (11.207,-5.330) {a25};
+  \node[collab] at (11.655,-5.330) {a26};
+  \node[collab] at (12.103,-5.330) {a27};
+  \node[collab] at (12.552,-5.330) {a28};
+  \node[collab] at (13.000,-5.330) {a29};
+  \node[panellab] at (-1.150,-2.640) {data};
+  \node[attr] (lna0) at (0.000,0.950) {};
+  \node[attr] (lna1) at (0.448,0.950) {};
+  \node[attr] (lna2) at (0.897,0.950) {};
+  \node[attr] (lna3) at (1.345,0.950) {};
+  \node[attr] (lna4) at (1.793,0.950) {};
+  \node[attr] (lna5) at (2.241,0.950) {};
+  \node[attr] (lna6) at (2.690,0.950) {};
+  \node[attr] (lna7) at (3.138,0.950) {};
+  \node[attr] (lna8) at (3.586,0.950) {};
+  \node[attr] (lna9) at (4.034,0.950) {};
+  \node[attr] (lna10) at (4.483,0.950) {};
+  \node[attr] (lna11) at (4.931,0.950) {};
+  \node[attr] (lna12) at (5.379,0.950) {};
+  \node[attr] (lna13) at (5.828,0.950) {};
+  \node[attr] (lna14) at (6.276,0.950) {};
+  \node[attr] (lna15) at (6.724,0.950) {};
+  \node[attr] (lna16) at (7.172,0.950) {};
+  \node[attr] (lna17) at (7.621,0.950) {};
+  \node[attr] (lna18) at (8.069,0.950) {};
+  \node[attr] (lna19) at (8.517,0.950) {};
+  \node[attr] (lna20) at (8.966,0.950) {};
+  \node[attr] (lna21) at (9.414,0.950) {};
+  \node[attr] (lna22) at (9.862,0.950) {};
+  \node[attr] (lna23) at (10.310,0.950) {};
+  \node[attr] (lna24) at (10.759,0.950) {};
+  \node[attr] (lna25) at (11.207,0.950) {};
+  \node[attr] (lna26) at (11.655,0.950) {};
+  \node[attr] (lna27) at (12.103,0.950) {};
+  \node[attr] (lna28) at (12.552,0.950) {};
+  \node[attr] (lna29) at (13.000,0.950) {};
+  \node[concept] (lnc31) at (4.184,2.000) {\tiny C31};
+  \node[concept] (lnc36) at (8.629,2.000) {\tiny C36};
+  \node[concept] (lnc37) at (6.971,2.000) {\tiny C37};
+  \node[concept] (lnc40) at (7.374,2.000) {\tiny C40};
+  \node[concept] (lnc43) at (6.164,2.000) {\tiny C43};
+  \node[concept] (lnc47) at (7.778,2.000) {\tiny C47};
+  \node[concept] (lnc50) at (6.567,2.000) {\tiny C50};
+  \node[concept] (lnc51) at (5.043,2.000) {\tiny C51};
+  \node[concept] (lnc52) at (8.133,3.050) {\tiny C52};
+  \node[concept] (lnc53) at (5.315,3.050) {\tiny C53};
+  \node[concept] (lnc54) at (7.004,3.050) {\tiny C54};
+  \node[concept] (lnc55) at (5.719,3.050) {\tiny C55};
+  \node[concept, fill=cConcOn] (lnc56) at (6.304,4.100) {\tiny C56};
+  \node[concept, fill=cConcOn] (lnc74) at (6.724,4.100) {\tiny C74};
+  \draw[edge] (lnc31) -- (lna0);
+  \draw[edge] (lnc31) -- (lna9);
+  \draw[edge] (lnc31) -- (lna19);
+  \draw[edge] (lnc36) -- (lna12);
+  \draw[edge] (lnc36) -- (lna18);
+  \draw[edge] (lnc36) -- (lna21);
+  \draw[edge] (lnc36) -- (lna26);
+  \draw[edge] (lnc37) -- (lna6);
+  \draw[edge] (lnc37) -- (lna15);
+  \draw[edge] (lnc37) -- (lna16);
+  \draw[edge] (lnc37) -- (lna23);
+  \draw[edge] (lnc40) -- (lna2);
+  \draw[edge] (lnc40) -- (lna13);
+  \draw[edge] (lnc40) -- (lna22);
+  \draw[edge] (lnc40) -- (lna28);
+  \draw[edge] (lnc43) -- (lna24);
+  \draw[edge] (lnc43) -- (lna17);
+  \draw[edge] (lnc43) -- (lna10);
+  \draw[edge] (lnc43) -- (lna4);
+  \draw[edge] (lnc47) -- (lna25);
+  \draw[edge] (lnc47) -- (lna20);
+  \draw[edge] (lnc47) -- (lna5);
+  \draw[edge] (lnc50) -- (lna3);
+  \draw[edge] (lnc50) -- (lna11);
+  \draw[edge] (lnc50) -- (lna27);
+  \draw[edge] (lnc50) -- (lna14);
+  \draw[edge] (lnc51) -- (lna8);
+  \draw[edge] (lnc51) -- (lna1);
+  \draw[edge] (lnc51) -- (lna29);
+  \draw[edge] (lnc51) -- (lna7);
+  \draw[edge] (lnc52) -- (lnc36);
+  \draw[edge] (lnc52) -- (lnc47);
+  \draw[edge] (lnc53) -- (lnc50);
+  \draw[edge] (lnc53) -- (lnc31);
+  \draw[edge] (lnc54) -- (lnc40);
+  \draw[edge] (lnc54) -- (lnc37);
+  \draw[edge] (lnc55) -- (lnc51);
+  \draw[edge] (lnc55) -- (lnc43);
+  \draw[edge] (lnc56) -- (lnc54);
+  \draw[edge] (lnc56) -- (lnc55);
+  \draw[edge] (lnc74) -- (lnc52);
+  \draw[edge] (lnc74) -- (lnc53);
+  \node[panellab] at (-1.150,2.525) {learned};
+  \node[attr] (pla0) at (0.000,5.600) {};
+  \node[attr] (pla1) at (0.448,5.600) {};
+  \node[attr] (pla2) at (0.897,5.600) {};
+  \node[attr] (pla3) at (1.345,5.600) {};
+  \node[attr] (pla4) at (1.793,5.600) {};
+  \node[attr] (pla5) at (2.241,5.600) {};
+  \node[attr] (pla6) at (2.690,5.600) {};
+  \node[attr] (pla7) at (3.138,5.600) {};
+  \node[attr] (pla8) at (3.586,5.600) {};
+  \node[attr] (pla9) at (4.034,5.600) {};
+  \node[attr] (pla10) at (4.483,5.600) {};
+  \node[attr] (pla11) at (4.931,5.600) {};
+  \node[attr] (pla12) at (5.379,5.600) {};
+  \node[attr] (pla13) at (5.828,5.600) {};
+  \node[attr] (pla14) at (6.276,5.600) {};
+  \node[attr] (pla15) at (6.724,5.600) {};
+  \node[attr] (pla16) at (7.172,5.600) {};
+  \node[attr] (pla17) at (7.621,5.600) {};
+  \node[attr] (pla18) at (8.069,5.600) {};
+  \node[attr] (pla19) at (8.517,5.600) {};
+  \node[attr] (pla20) at (8.966,5.600) {};
+  \node[attr] (pla21) at (9.414,5.600) {};
+  \node[attr] (pla22) at (9.862,5.600) {};
+  \node[attr] (pla23) at (10.310,5.600) {};
+  \node[attr] (pla24) at (10.759,5.600) {};
+  \node[attr] (pla25) at (11.207,5.600) {};
+  \node[attr] (pla26) at (11.655,5.600) {};
+  \node[attr] (pla27) at (12.103,5.600) {};
+  \node[attr] (pla28) at (12.552,5.600) {};
+  \node[attr] (pla29) at (13.000,5.600) {};
+  \node[concept] (plc30) at (4.184,6.650) {\tiny C30};
+  \node[concept] (plc31) at (6.164,6.650) {\tiny C31};
+  \node[concept] (plc32) at (8.629,6.650) {\tiny C32};
+  \node[concept] (plc33) at (6.567,6.650) {\tiny C33};
+  \node[concept] (plc34) at (7.374,6.650) {\tiny C34};
+  \node[concept] (plc35) at (5.043,6.650) {\tiny C35};
+  \node[concept] (plc36) at (6.971,6.650) {\tiny C36};
+  \node[concept] (plc37) at (7.778,6.650) {\tiny C37};
+  \node[concept] (plc38) at (8.133,7.700) {\tiny C38};
+  \node[concept] (plc39) at (5.315,7.700) {\tiny C39};
+  \node[concept] (plc40) at (5.719,7.700) {\tiny C40};
+  \node[concept] (plc41) at (7.004,7.700) {\tiny C41};
+  \node[concept] (plc42) at (6.304,8.750) {\tiny C42};
+  \node[concept] (plc43) at (6.724,8.750) {\tiny C43};
+  \draw[edge] (plc30) -- (pla0);
+  \draw[edge] (plc30) -- (pla9);
+  \draw[edge] (plc30) -- (pla19);
+  \draw[edge] (plc31) -- (pla24);
+  \draw[edge] (plc31) -- (pla17);
+  \draw[edge] (plc31) -- (pla10);
+  \draw[edge] (plc31) -- (pla4);
+  \draw[edge] (plc32) -- (pla26);
+  \draw[edge] (plc32) -- (pla18);
+  \draw[edge] (plc32) -- (pla12);
+  \draw[edge] (plc32) -- (pla21);
+  \draw[edge] (plc33) -- (pla27);
+  \draw[edge] (plc33) -- (pla11);
+  \draw[edge] (plc33) -- (pla3);
+  \draw[edge] (plc33) -- (pla14);
+  \draw[edge] (plc34) -- (pla2);
+  \draw[edge] (plc34) -- (pla28);
+  \draw[edge] (plc34) -- (pla13);
+  \draw[edge] (plc34) -- (pla22);
+  \draw[edge] (plc35) -- (pla8);
+  \draw[edge] (plc35) -- (pla1);
+  \draw[edge] (plc35) -- (pla29);
+  \draw[edge] (plc35) -- (pla7);
+  \draw[edge] (plc36) -- (pla16);
+  \draw[edge] (plc36) -- (pla23);
+  \draw[edge] (plc36) -- (pla6);
+  \draw[edge] (plc36) -- (pla15);
+  \draw[edge] (plc37) -- (pla25);
+  \draw[edge] (plc37) -- (pla20);
+  \draw[edge] (plc37) -- (pla5);
+  \draw[edge] (plc38) -- (plc32);
+  \draw[edge] (plc38) -- (plc37);
+  \draw[edge] (plc39) -- (plc33);
+  \draw[edge] (plc39) -- (plc30);
+  \draw[edge] (plc40) -- (plc35);
+  \draw[edge] (plc40) -- (plc31);
+  \draw[edge] (plc41) -- (plc34);
+  \draw[edge] (plc41) -- (plc36);
+  \draw[edge] (plc42) -- (plc40);
+  \draw[edge] (plc42) -- (plc41);
+  \draw[edge] (plc43) -- (plc38);
+  \draw[edge] (plc43) -- (plc39);
+  \node[panellab] at (-1.150,7.175) {planted};
+\end{tikzpicture}\end{center}
+\medskip\noindent\textit{Rent} (bits lost if a node were removed; node colour):\par\begin{center}\begin{tikzpicture}
+  \node[attr] (rta0) at (0.000,0.000) {};
+  \node[attr] (rta1) at (0.448,0.000) {};
+  \node[attr] (rta2) at (0.897,0.000) {};
+  \node[attr] (rta3) at (1.345,0.000) {};
+  \node[attr] (rta4) at (1.793,0.000) {};
+  \node[attr] (rta5) at (2.241,0.000) {};
+  \node[attr] (rta6) at (2.690,0.000) {};
+  \node[attr] (rta7) at (3.138,0.000) {};
+  \node[attr] (rta8) at (3.586,0.000) {};
+  \node[attr] (rta9) at (4.034,0.000) {};
+  \node[attr] (rta10) at (4.483,0.000) {};
+  \node[attr] (rta11) at (4.931,0.000) {};
+  \node[attr] (rta12) at (5.379,0.000) {};
+  \node[attr] (rta13) at (5.828,0.000) {};
+  \node[attr] (rta14) at (6.276,0.000) {};
+  \node[attr] (rta15) at (6.724,0.000) {};
+  \node[attr] (rta16) at (7.172,0.000) {};
+  \node[attr] (rta17) at (7.621,0.000) {};
+  \node[attr] (rta18) at (8.069,0.000) {};
+  \node[attr] (rta19) at (8.517,0.000) {};
+  \node[attr] (rta20) at (8.966,0.000) {};
+  \node[attr] (rta21) at (9.414,0.000) {};
+  \node[attr] (rta22) at (9.862,0.000) {};
+  \node[attr] (rta23) at (10.310,0.000) {};
+  \node[attr] (rta24) at (10.759,0.000) {};
+  \node[attr] (rta25) at (11.207,0.000) {};
+  \node[attr] (rta26) at (11.655,0.000) {};
+  \node[attr] (rta27) at (12.103,0.000) {};
+  \node[attr] (rta28) at (12.552,0.000) {};
+  \node[attr] (rta29) at (13.000,0.000) {};
+  \definecolor{rcrt31}{rgb}{0.379,0.732,0.428}
+  \node[concept, fill=rcrt31, text=white] (rtc31) at (4.184,1.050) {\tiny C31};
+  \definecolor{rcrt36}{rgb}{0.142,0.524,0.267}
+  \node[concept, fill=rcrt36, text=white] (rtc36) at (8.629,1.050) {\tiny C36};
+  \definecolor{rcrt37}{rgb}{0.000,0.404,0.214}
+  \node[concept, fill=rcrt37, text=white] (rtc37) at (6.971,1.050) {\tiny C37};
+  \definecolor{rcrt40}{rgb}{0.000,0.271,0.161}
+  \node[concept, fill=rcrt40, text=white] (rtc40) at (7.374,1.050) {\tiny C40};
+  \definecolor{rcrt43}{rgb}{0.000,0.391,0.209}
+  \node[concept, fill=rcrt43, text=white] (rtc43) at (6.164,1.050) {\tiny C43};
+  \definecolor{rcrt47}{rgb}{0.359,0.722,0.418}
+  \node[concept, fill=rcrt47, text=white] (rtc47) at (7.778,1.050) {\tiny C47};
+  \definecolor{rcrt50}{rgb}{0.157,0.543,0.280}
+  \node[concept, fill=rcrt50, text=white] (rtc50) at (6.567,1.050) {\tiny C50};
+  \definecolor{rcrt51}{rgb}{0.013,0.419,0.220}
+  \node[concept, fill=rcrt51, text=white] (rtc51) at (5.043,1.050) {\tiny C51};
+  \definecolor{rcrt52}{rgb}{0.887,0.956,0.666}
+  \node[concept, fill=rcrt52, text=black] (rtc52) at (8.133,2.100) {\tiny C52};
+  \definecolor{rcrt53}{rgb}{0.887,0.956,0.666}
+  \node[concept, fill=rcrt53, text=black] (rtc53) at (5.315,2.100) {\tiny C53};
+  \definecolor{rcrt54}{rgb}{0.950,0.981,0.712}
+  \node[concept, fill=rcrt54, text=black] (rtc54) at (7.004,2.100) {\tiny C54};
+  \definecolor{rcrt55}{rgb}{0.939,0.976,0.703}
+  \node[concept, fill=rcrt55, text=black] (rtc55) at (5.719,2.100) {\tiny C55};
+  \definecolor{rcrt56}{rgb}{0.939,0.976,0.703}
+  \node[concept, fill=rcrt56, text=black] (rtc56) at (6.304,3.150) {\tiny C56};
+  \definecolor{rcrt74}{rgb}{0.976,0.991,0.768}
+  \node[concept, fill=rcrt74, text=black] (rtc74) at (6.724,3.150) {\tiny C74};
+  \draw[edge] (rtc31) -- (rta0);
+  \draw[edge] (rtc31) -- (rta9);
+  \draw[edge] (rtc31) -- (rta19);
+  \draw[edge] (rtc36) -- (rta12);
+  \draw[edge] (rtc36) -- (rta18);
+  \draw[edge] (rtc36) -- (rta21);
+  \draw[edge] (rtc36) -- (rta26);
+  \draw[edge] (rtc37) -- (rta6);
+  \draw[edge] (rtc37) -- (rta15);
+  \draw[edge] (rtc37) -- (rta16);
+  \draw[edge] (rtc37) -- (rta23);
+  \draw[edge] (rtc40) -- (rta2);
+  \draw[edge] (rtc40) -- (rta13);
+  \draw[edge] (rtc40) -- (rta22);
+  \draw[edge] (rtc40) -- (rta28);
+  \draw[edge] (rtc43) -- (rta24);
+  \draw[edge] (rtc43) -- (rta17);
+  \draw[edge] (rtc43) -- (rta10);
+  \draw[edge] (rtc43) -- (rta4);
+  \draw[edge] (rtc47) -- (rta25);
+  \draw[edge] (rtc47) -- (rta20);
+  \draw[edge] (rtc47) -- (rta5);
+  \draw[edge] (rtc50) -- (rta3);
+  \draw[edge] (rtc50) -- (rta11);
+  \draw[edge] (rtc50) -- (rta27);
+  \draw[edge] (rtc50) -- (rta14);
+  \draw[edge] (rtc51) -- (rta8);
+  \draw[edge] (rtc51) -- (rta1);
+  \draw[edge] (rtc51) -- (rta29);
+  \draw[edge] (rtc51) -- (rta7);
+  \draw[edge] (rtc52) -- (rtc36);
+  \draw[edge] (rtc52) -- (rtc47);
+  \draw[edge] (rtc53) -- (rtc50);
+  \draw[edge] (rtc53) -- (rtc31);
+  \draw[edge] (rtc54) -- (rtc40);
+  \draw[edge] (rtc54) -- (rtc37);
+  \draw[edge] (rtc55) -- (rtc51);
+  \draw[edge] (rtc55) -- (rtc43);
+  \draw[edge] (rtc56) -- (rtc54);
+  \draw[edge] (rtc56) -- (rtc55);
+  \draw[edge] (rtc74) -- (rtc52);
+  \draw[edge] (rtc74) -- (rtc53);
+  \node[rentval] at (4.184,0.710) {1060\,b};
+  \node[rentval] at (8.629,0.710) {1423\,b};
+  \node[rentval] at (6.971,0.710) {1676\,b};
+  \node[rentval] at (7.374,0.710) {1912\,b};
+  \node[rentval] at (6.164,0.710) {1701\,b};
+  \node[rentval] at (7.778,0.710) {1078\,b};
+  \node[rentval] at (6.567,0.710) {1395\,b};
+  \node[rentval] at (5.043,0.710) {1650\,b};
+  \node[rentval] at (8.133,1.760) {404\,b};
+  \node[rentval] at (5.315,1.760) {408\,b};
+  \node[rentval] at (7.004,1.760) {278\,b};
+  \node[rentval] at (5.719,1.760) {300\,b};
+  \node[rentval] at (6.304,2.810) {299\,b};
+  \node[rentval] at (6.724,2.810) {185\,b};
+  \definecolor{cb0}{rgb}{1.000,1.000,0.898}
+  \fill[cb0] (13.600,0.000) rectangle (14.050,0.131);
+  \definecolor{cb1}{rgb}{0.990,0.996,0.844}
+  \fill[cb1] (13.600,0.131) rectangle (14.050,0.263);
+  \definecolor{cb2}{rgb}{0.979,0.992,0.784}
+  \fill[cb2] (13.600,0.263) rectangle (14.050,0.394);
+  \definecolor{cb3}{rgb}{0.968,0.988,0.725}
+  \fill[cb3] (13.600,0.394) rectangle (14.050,0.525);
+  \definecolor{cb4}{rgb}{0.931,0.973,0.698}
+  \fill[cb4] (13.600,0.525) rectangle (14.050,0.656);
+  \definecolor{cb5}{rgb}{0.891,0.957,0.668}
+  \fill[cb5] (13.600,0.656) rectangle (14.050,0.788);
+  \definecolor{cb6}{rgb}{0.850,0.941,0.639}
+  \fill[cb6] (13.600,0.788) rectangle (14.050,0.919);
+  \definecolor{cb7}{rgb}{0.795,0.917,0.613}
+  \fill[cb7] (13.600,0.919) rectangle (14.050,1.050);
+  \definecolor{cb8}{rgb}{0.736,0.892,0.584}
+  \fill[cb8] (13.600,1.050) rectangle (14.050,1.181);
+  \definecolor{cb9}{rgb}{0.676,0.866,0.556}
+  \fill[cb9] (13.600,1.181) rectangle (14.050,1.313);
+  \definecolor{cb10}{rgb}{0.611,0.837,0.530}
+  \fill[cb10] (13.600,1.313) rectangle (14.050,1.444);
+  \definecolor{cb11}{rgb}{0.539,0.806,0.502}
+  \fill[cb11] (13.600,1.444) rectangle (14.050,1.575);
+  \definecolor{cb12}{rgb}{0.467,0.775,0.473}
+  \fill[cb12] (13.600,1.575) rectangle (14.050,1.706);
+  \definecolor{cb13}{rgb}{0.400,0.742,0.438}
+  \fill[cb13] (13.600,1.706) rectangle (14.050,1.838);
+  \definecolor{cb14}{rgb}{0.325,0.705,0.400}
+  \fill[cb14] (13.600,1.838) rectangle (14.050,1.969);
+  \definecolor{cb15}{rgb}{0.253,0.668,0.363}
+  \fill[cb15] (13.600,1.969) rectangle (14.050,2.100);
+  \definecolor{cb16}{rgb}{0.216,0.620,0.331}
+  \fill[cb16] (13.600,2.100) rectangle (14.050,2.231);
+  \definecolor{cb17}{rgb}{0.175,0.567,0.296}
+  \fill[cb17] (13.600,2.231) rectangle (14.050,2.363);
+  \definecolor{cb18}{rgb}{0.134,0.515,0.262}
+  \fill[cb18] (13.600,2.363) rectangle (14.050,2.494);
+  \definecolor{cb19}{rgb}{0.091,0.481,0.247}
+  \fill[cb19] (13.600,2.494) rectangle (14.050,2.625);
+  \definecolor{cb20}{rgb}{0.044,0.443,0.231}
+  \fill[cb20] (13.600,2.625) rectangle (14.050,2.756);
+  \definecolor{cb21}{rgb}{0.000,0.404,0.214}
+  \fill[cb21] (13.600,2.756) rectangle (14.050,2.888);
+  \definecolor{cb22}{rgb}{0.000,0.361,0.197}
+  \fill[cb22] (13.600,2.888) rectangle (14.050,3.019);
+  \definecolor{cb23}{rgb}{0.000,0.314,0.178}
+  \fill[cb23] (13.600,3.019) rectangle (14.050,3.150);
+  \draw[cellframe] (13.600,0.000) rectangle (14.050,3.150);
+  \node[cblab] at (14.150,0.000) {0};
+  \node[cblab] at (14.150,3.150) {1912\,b};
+\end{tikzpicture}\end{center}
+\begin{center}\begin{tikzpicture}
+\begin{axis}[cltraj, xlabel={accepted move}, ylabel={total $L$ (bits)}]
+  \addplot[cLine] coordinates {(0,57802) (1,56481) (2,55169) (3,53947) (4,52635) (5,52634) (6,51396) (7,50013) (8,48737) (9,47514) (10,46310) (11,45004) (12,43762) (13,42576) (14,41254) (15,39957) (16,38785) (17,37527) (18,36340) (19,35047) (20,33875) (21,32564) (22,32563) (23,31336) (24,30172) (25,29559) (26,28949) (27,28392) (28,27851) (29,27695) (30,27633) (31,27620) (32,27566) (33,27518) (34,27473) (35,27430) (36,27419) (37,27411) (38,27362) (39,27314) (40,27272) (41,27217) (42,27206) (43,27191) (44,27150) (45,27110) (46,27072) (47,27035) (48,27023) (49,27019) (50,27019) (51,26983) (52,26933) (53,26898) (54,26864) (55,26858) (56,26828) (57,26800) (58,26772) (59,26745) (60,26735) (61,26707) (62,26680) (63,26654) (64,26635) (65,26628) (66,26616) (67,26605) (68,26587) (69,26550) (70,26534) (71,26520) (72,26510) (73,26502) (74,26490) (75,26477) (76,26466) (77,26439) (78,26427) (79,26414) (80,26383) (81,26372) (82,26350) (83,26341) (84,26334) (85,26326) (86,26310) (87,26302) (88,26284) (89,26279) (90,26268) (91,26260) (92,26248) (93,26239) (94,26235) (95,26217) (96,26183) (97,26170) (98,26157) (99,26154) (100,26151) (101,26150) (102,26149) (103,26080) (104,26078) (105,26078) (106,25883) (107,25880) (108,25880) (109,25863) (110,25852) (111,25838) (112,25837) (113,25476) (114,25475) (115,25467) (116,25464) (117,25454) (118,25454) (119,25449) (120,25429) (121,25409) (122,25394) (123,25394) (124,25389) (125,25225) (126,25224) (127,24605) (128,24596) (129,24580) (130,24552) (131,24525) (132,24508) (133,24481) (134,24454) (135,24427) (136,24400) (137,24373) (138,24347) (139,24320) (140,24294) (141,24268) (142,24245) (143,24219) (144,24193) (145,23815)};
+  \addplot[cPlanted, domain=0:145] {25938};
+  \addlegendentry{learned $L$} \addlegendentry{planted $L$}
+\end{axis}
+\begin{axis}[cldelta, xlabel={accepted move}, ylabel={$\Delta L$ (bits)}]
+  \addplot[ybar, bar width=3pt, draw=cAmberE, fill=cGood] coordinates {(0,-1322) (1,-1311) (2,-1223) (3,-1311) (4,-1) (5,-1238) (6,-1383) (7,-1275) (8,-1224) (9,-1204) (10,-1306) (11,-1242) (12,-1185) (13,-1323) (14,-1297) (15,-1172) (16,-1258) (17,-1186) (18,-1293) (19,-1172) (20,-1311) (21,-1) (22,-1228) (23,-1164) (24,-613) (25,-610) (26,-558) (27,-540) (28,-156) (29,-62) (30,-13) (31,-55) (32,-48) (33,-45) (34,-43) (35,-11) (36,-8) (37,-49) (38,-49) (39,-42) (40,-55) (41,-11) (42,-15) (43,-41) (44,-40) (45,-38) (46,-36) (47,-12) (48,-5) (49,-0) (50,-36) (51,-50) (52,-35) (53,-34) (54,-6) (55,-30) (56,-28) (57,-28) (58,-28) (59,-10) (60,-28) (61,-27) (62,-26) (63,-19) (64,-7) (65,-12) (66,-11) (67,-18) (68,-38) (69,-16) (70,-14) (71,-10) (72,-8) (73,-13) (74,-12) (75,-11) (76,-26) (77,-12) (78,-14) (79,-31) (80,-11) (81,-22) (82,-10) (83,-6) (84,-8) (85,-17) (86,-8) (87,-18) (88,-6) (89,-11) (90,-8) (91,-12) (92,-9) (93,-4) (94,-17) (95,-34) (96,-13) (97,-13) (98,-3) (99,-2) (100,-1) (101,-1) (102,-70) (103,-2) (104,-0) (105,-194) (106,-3) (107,-0) (108,-16) (109,-11) (110,-14) (111,-1) (112,-362) (113,-1) (114,-7) (115,-3) (116,-10) (117,-1) (118,-5) (119,-20) (120,-20) (121,-14) (122,-1) (123,-5) (124,-163) (125,-1) (126,-619) (127,-9) (128,-17) (129,-27) (130,-27) (131,-17) (132,-27) (133,-27) (134,-27) (135,-27) (136,-27) (137,-27) (138,-26) (139,-26) (140,-26) (141,-23) (142,-26) (143,-26) (144,-378)};
+\end{axis}
+\end{tikzpicture}\end{center}
+\clearpage
+\section*{Two independent factors (a product)}
+Two independent hierarchies on disjoint attribute blocks, concatenated. The learner returns two disconnected components with no cross-block concept; the product lives in the object codes.\par\medskip
+\begin{center}\begin{tikzpicture}
+  \fill[cCell] (-0.283,0.000) rectangle (0.283,-0.240);
+  \fill[cCell] (0.848,0.000) rectangle (1.413,-0.240);
+  \fill[cCell] (4.804,0.000) rectangle (5.370,-0.240);
+  \fill[cCell] (0.283,-0.240) rectangle (0.848,-0.480);
+  \fill[cCell] (1.413,-0.240) rectangle (1.978,-0.480);
+  \fill[cCell] (3.674,-0.240) rectangle (4.239,-0.480);
+  \fill[cCell] (5.370,-0.240) rectangle (5.935,-0.480);
+  \fill[cCell] (5.935,-0.240) rectangle (6.500,-0.480);
+  \fill[cCell] (7.065,-0.240) rectangle (7.630,-0.480);
+  \fill[cCell] (8.196,-0.240) rectangle (8.761,-0.480);
+  \fill[cCell] (-0.283,-0.480) rectangle (0.283,-0.720);
+  \fill[cCell] (0.848,-0.480) rectangle (1.413,-0.720);
+  \fill[cCell] (1.413,-0.480) rectangle (1.978,-0.720);
+  \fill[cCell] (1.978,-0.480) rectangle (2.543,-0.720);
+  \fill[cCell] (2.543,-0.480) rectangle (3.109,-0.720);
+  \fill[cCell] (3.674,-0.480) rectangle (4.239,-0.720);
+  \fill[cCell] (4.239,-0.480) rectangle (4.804,-0.720);
+  \fill[cCell] (4.804,-0.480) rectangle (5.370,-0.720);
+  \fill[cCell] (5.370,-0.480) rectangle (5.935,-0.720);
+  \fill[cCell] (6.500,-0.480) rectangle (7.065,-0.720);
+  \fill[cCell] (8.761,-0.480) rectangle (9.326,-0.720);
+  \fill[cCell] (-0.283,-0.720) rectangle (0.283,-0.960);
+  \fill[cCell] (0.848,-0.720) rectangle (1.413,-0.960);
+  \fill[cCell] (4.804,-0.720) rectangle (5.370,-0.960);
+  \fill[cCell] (7.630,-0.720) rectangle (8.196,-0.960);
+  \fill[cCell] (11.022,-0.720) rectangle (11.587,-0.960);
+  \fill[cCell] (-0.283,-0.960) rectangle (0.283,-1.200);
+  \fill[cCell] (0.283,-0.960) rectangle (0.848,-1.200);
+  \fill[cCell] (0.848,-0.960) rectangle (1.413,-1.200);
+  \fill[cCell] (1.413,-0.960) rectangle (1.978,-1.200);
+  \fill[cCell] (1.978,-0.960) rectangle (2.543,-1.200);
+  \fill[cCell] (2.543,-0.960) rectangle (3.109,-1.200);
+  \fill[cCell] (3.674,-0.960) rectangle (4.239,-1.200);
+  \fill[cCell] (4.239,-0.960) rectangle (4.804,-1.200);
+  \fill[cCell] (4.804,-0.960) rectangle (5.370,-1.200);
+  \fill[cCell] (5.370,-0.960) rectangle (5.935,-1.200);
+  \fill[cCell] (5.935,-0.960) rectangle (6.500,-1.200);
+  \fill[cCell] (7.630,-0.960) rectangle (8.196,-1.200);
+  \fill[cCell] (11.022,-0.960) rectangle (11.587,-1.200);
+  \fill[cCell] (-0.283,-1.200) rectangle (0.283,-1.440);
+  \fill[cCell] (0.848,-1.200) rectangle (1.413,-1.440);
+  \fill[cCell] (1.978,-1.200) rectangle (2.543,-1.440);
+  \fill[cCell] (2.543,-1.200) rectangle (3.109,-1.440);
+  \fill[cCell] (4.239,-1.200) rectangle (4.804,-1.440);
+  \fill[cCell] (4.804,-1.200) rectangle (5.370,-1.440);
+  \fill[cCell] (6.500,-1.200) rectangle (7.065,-1.440);
+  \fill[cCell] (7.630,-1.200) rectangle (8.196,-1.440);
+  \fill[cCell] (8.761,-1.200) rectangle (9.326,-1.440);
+  \fill[cCell] (11.022,-1.200) rectangle (11.587,-1.440);
+  \fill[cCell] (-0.283,-1.440) rectangle (0.283,-1.680);
+  \fill[cCell] (0.848,-1.440) rectangle (1.413,-1.680);
+  \fill[cCell] (1.978,-1.440) rectangle (2.543,-1.680);
+  \fill[cCell] (2.543,-1.440) rectangle (3.109,-1.680);
+  \fill[cCell] (4.239,-1.440) rectangle (4.804,-1.680);
+  \fill[cCell] (4.804,-1.440) rectangle (5.370,-1.680);
+  \fill[cCell] (6.500,-1.440) rectangle (7.065,-1.680);
+  \fill[cCell] (7.630,-1.440) rectangle (8.196,-1.680);
+  \fill[cCell] (8.761,-1.440) rectangle (9.326,-1.680);
+  \fill[cCell] (11.022,-1.440) rectangle (11.587,-1.680);
+  \fill[cCell] (0.283,-1.680) rectangle (0.848,-1.920);
+  \fill[cCell] (5.935,-1.680) rectangle (6.500,-1.920);
+  \fill[cCell] (6.500,-1.680) rectangle (7.065,-1.920);
+  \fill[cCell] (7.630,-1.680) rectangle (8.196,-1.920);
+  \fill[cCell] (8.761,-1.680) rectangle (9.326,-1.920);
+  \fill[cCell] (11.022,-1.680) rectangle (11.587,-1.920);
+  \fill[cCell] (0.283,-1.920) rectangle (0.848,-2.160);
+  \fill[cCell] (1.413,-1.920) rectangle (1.978,-2.160);
+  \fill[cCell] (3.674,-1.920) rectangle (4.239,-2.160);
+  \fill[cCell] (5.370,-1.920) rectangle (5.935,-2.160);
+  \fill[cCell] (5.935,-1.920) rectangle (6.500,-2.160);
+  \fill[cCell] (6.500,-1.920) rectangle (7.065,-2.160);
+  \fill[cCell] (7.630,-1.920) rectangle (8.196,-2.160);
+  \fill[cCell] (8.761,-1.920) rectangle (9.326,-2.160);
+  \fill[cCell] (11.022,-1.920) rectangle (11.587,-2.160);
+  \fill[cCell] (-0.283,-2.160) rectangle (0.283,-2.400);
+  \fill[cCell] (0.283,-2.160) rectangle (0.848,-2.400);
+  \fill[cCell] (0.848,-2.160) rectangle (1.413,-2.400);
+  \fill[cCell] (1.413,-2.160) rectangle (1.978,-2.400);
+  \fill[cCell] (3.674,-2.160) rectangle (4.239,-2.400);
+  \fill[cCell] (4.804,-2.160) rectangle (5.370,-2.400);
+  \fill[cCell] (5.370,-2.160) rectangle (5.935,-2.400);
+  \fill[cCell] (5.935,-2.160) rectangle (6.500,-2.400);
+  \fill[cCell] (6.500,-2.160) rectangle (7.065,-2.400);
+  \fill[cCell] (7.630,-2.160) rectangle (8.196,-2.400);
+  \fill[cCell] (8.761,-2.160) rectangle (9.326,-2.400);
+  \fill[cCell] (11.022,-2.160) rectangle (11.587,-2.400);
+  \fill[cCell] (-0.283,-2.400) rectangle (0.283,-2.640);
+  \fill[cCell] (0.283,-2.400) rectangle (0.848,-2.640);
+  \fill[cCell] (0.848,-2.400) rectangle (1.413,-2.640);
+  \fill[cCell] (1.413,-2.400) rectangle (1.978,-2.640);
+  \fill[cCell] (1.978,-2.400) rectangle (2.543,-2.640);
+  \fill[cCell] (2.543,-2.400) rectangle (3.109,-2.640);
+  \fill[cCell] (3.674,-2.400) rectangle (4.239,-2.640);
+  \fill[cCell] (4.239,-2.400) rectangle (4.804,-2.640);
+  \fill[cCell] (4.804,-2.400) rectangle (5.370,-2.640);
+  \fill[cCell] (5.370,-2.400) rectangle (5.935,-2.640);
+  \fill[cCell] (5.935,-2.400) rectangle (6.500,-2.640);
+  \fill[cCell] (6.500,-2.400) rectangle (7.065,-2.640);
+  \fill[cCell] (7.065,-2.400) rectangle (7.630,-2.640);
+  \fill[cCell] (7.630,-2.400) rectangle (8.196,-2.640);
+  \fill[cCell] (8.196,-2.400) rectangle (8.761,-2.640);
+  \fill[cCell] (8.761,-2.400) rectangle (9.326,-2.640);
+  \fill[cCell] (11.022,-2.400) rectangle (11.587,-2.640);
+  \fill[cCell] (0.283,-2.640) rectangle (0.848,-2.880);
+  \fill[cCell] (1.413,-2.640) rectangle (1.978,-2.880);
+  \fill[cCell] (3.674,-2.640) rectangle (4.239,-2.880);
+  \fill[cCell] (5.370,-2.640) rectangle (5.935,-2.880);
+  \fill[cCell] (5.935,-2.640) rectangle (6.500,-2.880);
+  \fill[cCell] (9.891,-2.640) rectangle (10.457,-2.880);
+  \fill[cCell] (10.457,-2.640) rectangle (11.022,-2.880);
+  \fill[cCell] (12.152,-2.640) rectangle (12.717,-2.880);
+  \fill[cCell] (1.978,-2.880) rectangle (2.543,-3.120);
+  \fill[cCell] (2.543,-2.880) rectangle (3.109,-3.120);
+  \fill[cCell] (4.239,-2.880) rectangle (4.804,-3.120);
+  \fill[cCell] (7.065,-2.880) rectangle (7.630,-3.120);
+  \fill[cCell] (8.196,-2.880) rectangle (8.761,-3.120);
+  \fill[cCell] (9.891,-2.880) rectangle (10.457,-3.120);
+  \fill[cCell] (10.457,-2.880) rectangle (11.022,-3.120);
+  \fill[cCell] (12.152,-2.880) rectangle (12.717,-3.120);
+  \fill[cCell] (-0.283,-3.120) rectangle (0.283,-3.360);
+  \fill[cCell] (0.848,-3.120) rectangle (1.413,-3.360);
+  \fill[cCell] (1.978,-3.120) rectangle (2.543,-3.360);
+  \fill[cCell] (2.543,-3.120) rectangle (3.109,-3.360);
+  \fill[cCell] (4.239,-3.120) rectangle (4.804,-3.360);
+  \fill[cCell] (4.804,-3.120) rectangle (5.370,-3.360);
+  \fill[cCell] (7.065,-3.120) rectangle (7.630,-3.360);
+  \fill[cCell] (8.196,-3.120) rectangle (8.761,-3.360);
+  \fill[cCell] (9.891,-3.120) rectangle (10.457,-3.360);
+  \fill[cCell] (10.457,-3.120) rectangle (11.022,-3.360);
+  \fill[cCell] (12.152,-3.120) rectangle (12.717,-3.360);
+  \fill[cCell] (1.413,-3.360) rectangle (1.978,-3.600);
+  \fill[cCell] (3.674,-3.360) rectangle (4.239,-3.600);
+  \fill[cCell] (5.370,-3.360) rectangle (5.935,-3.600);
+  \fill[cCell] (7.065,-3.360) rectangle (7.630,-3.600);
+  \fill[cCell] (8.196,-3.360) rectangle (8.761,-3.600);
+  \fill[cCell] (9.891,-3.360) rectangle (10.457,-3.600);
+  \fill[cCell] (10.457,-3.360) rectangle (11.022,-3.600);
+  \fill[cCell] (12.152,-3.360) rectangle (12.717,-3.600);
+  \fill[cCell] (0.283,-3.600) rectangle (0.848,-3.840);
+  \fill[cCell] (5.935,-3.600) rectangle (6.500,-3.840);
+  \fill[cCell] (7.065,-3.600) rectangle (7.630,-3.840);
+  \fill[cCell] (8.196,-3.600) rectangle (8.761,-3.840);
+  \fill[cCell] (9.891,-3.600) rectangle (10.457,-3.840);
+  \fill[cCell] (10.457,-3.600) rectangle (11.022,-3.840);
+  \fill[cCell] (12.152,-3.600) rectangle (12.717,-3.840);
+  \fill[cCell] (0.283,-3.840) rectangle (0.848,-4.080);
+  \fill[cCell] (1.413,-3.840) rectangle (1.978,-4.080);
+  \fill[cCell] (3.674,-3.840) rectangle (4.239,-4.080);
+  \fill[cCell] (5.370,-3.840) rectangle (5.935,-4.080);
+  \fill[cCell] (5.935,-3.840) rectangle (6.500,-4.080);
+  \fill[cCell] (7.065,-3.840) rectangle (7.630,-4.080);
+  \fill[cCell] (8.196,-3.840) rectangle (8.761,-4.080);
+  \fill[cCell] (9.891,-3.840) rectangle (10.457,-4.080);
+  \fill[cCell] (10.457,-3.840) rectangle (11.022,-4.080);
+  \fill[cCell] (12.152,-3.840) rectangle (12.717,-4.080);
+  \fill[cCell] (-0.283,-4.080) rectangle (0.283,-4.320);
+  \fill[cCell] (0.283,-4.080) rectangle (0.848,-4.320);
+  \fill[cCell] (0.848,-4.080) rectangle (1.413,-4.320);
+  \fill[cCell] (1.413,-4.080) rectangle (1.978,-4.320);
+  \fill[cCell] (1.978,-4.080) rectangle (2.543,-4.320);
+  \fill[cCell] (2.543,-4.080) rectangle (3.109,-4.320);
+  \fill[cCell] (3.674,-4.080) rectangle (4.239,-4.320);
+  \fill[cCell] (4.239,-4.080) rectangle (4.804,-4.320);
+  \fill[cCell] (4.804,-4.080) rectangle (5.370,-4.320);
+  \fill[cCell] (5.370,-4.080) rectangle (5.935,-4.320);
+  \fill[cCell] (5.935,-4.080) rectangle (6.500,-4.320);
+  \fill[cCell] (7.065,-4.080) rectangle (7.630,-4.320);
+  \fill[cCell] (8.196,-4.080) rectangle (8.761,-4.320);
+  \fill[cCell] (9.891,-4.080) rectangle (10.457,-4.320);
+  \fill[cCell] (10.457,-4.080) rectangle (11.022,-4.320);
+  \fill[cCell] (12.152,-4.080) rectangle (12.717,-4.320);
+  \fill[cCell] (-0.283,-4.320) rectangle (0.283,-4.560);
+  \fill[cCell] (0.848,-4.320) rectangle (1.413,-4.560);
+  \fill[cCell] (1.978,-4.320) rectangle (2.543,-4.560);
+  \fill[cCell] (2.543,-4.320) rectangle (3.109,-4.560);
+  \fill[cCell] (4.239,-4.320) rectangle (4.804,-4.560);
+  \fill[cCell] (4.804,-4.320) rectangle (5.370,-4.560);
+  \fill[cCell] (7.630,-4.320) rectangle (8.196,-4.560);
+  \fill[cCell] (9.891,-4.320) rectangle (10.457,-4.560);
+  \fill[cCell] (10.457,-4.320) rectangle (11.022,-4.560);
+  \fill[cCell] (11.022,-4.320) rectangle (11.587,-4.560);
+  \fill[cCell] (12.152,-4.320) rectangle (12.717,-4.560);
+  \fill[cCell] (1.413,-4.560) rectangle (1.978,-4.800);
+  \fill[cCell] (1.978,-4.560) rectangle (2.543,-4.800);
+  \fill[cCell] (2.543,-4.560) rectangle (3.109,-4.800);
+  \fill[cCell] (3.674,-4.560) rectangle (4.239,-4.800);
+  \fill[cCell] (4.239,-4.560) rectangle (4.804,-4.800);
+  \fill[cCell] (5.370,-4.560) rectangle (5.935,-4.800);
+  \fill[cCell] (6.500,-4.560) rectangle (7.065,-4.800);
+  \fill[cCell] (7.630,-4.560) rectangle (8.196,-4.800);
+  \fill[cCell] (8.761,-4.560) rectangle (9.326,-4.800);
+  \fill[cCell] (9.891,-4.560) rectangle (10.457,-4.800);
+  \fill[cCell] (10.457,-4.560) rectangle (11.022,-4.800);
+  \fill[cCell] (11.022,-4.560) rectangle (11.587,-4.800);
+  \fill[cCell] (12.152,-4.560) rectangle (12.717,-4.800);
+  \fill[cCell] (1.413,-4.800) rectangle (1.978,-5.040);
+  \fill[cCell] (3.674,-4.800) rectangle (4.239,-5.040);
+  \fill[cCell] (5.370,-4.800) rectangle (5.935,-5.040);
+  \fill[cCell] (6.500,-4.800) rectangle (7.065,-5.040);
+  \fill[cCell] (7.065,-4.800) rectangle (7.630,-5.040);
+  \fill[cCell] (7.630,-4.800) rectangle (8.196,-5.040);
+  \fill[cCell] (8.196,-4.800) rectangle (8.761,-5.040);
+  \fill[cCell] (8.761,-4.800) rectangle (9.326,-5.040);
+  \fill[cCell] (9.891,-4.800) rectangle (10.457,-5.040);
+  \fill[cCell] (10.457,-4.800) rectangle (11.022,-5.040);
+  \fill[cCell] (11.022,-4.800) rectangle (11.587,-5.040);
+  \fill[cCell] (12.152,-4.800) rectangle (12.717,-5.040);
+  \fill[cCell] (-0.283,-5.040) rectangle (0.283,-5.280);
+  \fill[cCell] (0.283,-5.040) rectangle (0.848,-5.280);
+  \fill[cCell] (0.848,-5.040) rectangle (1.413,-5.280);
+  \fill[cCell] (1.413,-5.040) rectangle (1.978,-5.280);
+  \fill[cCell] (1.978,-5.040) rectangle (2.543,-5.280);
+  \fill[cCell] (2.543,-5.040) rectangle (3.109,-5.280);
+  \fill[cCell] (3.674,-5.040) rectangle (4.239,-5.280);
+  \fill[cCell] (4.239,-5.040) rectangle (4.804,-5.280);
+  \fill[cCell] (4.804,-5.040) rectangle (5.370,-5.280);
+  \fill[cCell] (5.370,-5.040) rectangle (5.935,-5.280);
+  \fill[cCell] (5.935,-5.040) rectangle (6.500,-5.280);
+  \fill[cCell] (6.500,-5.040) rectangle (7.065,-5.280);
+  \fill[cCell] (7.065,-5.040) rectangle (7.630,-5.280);
+  \fill[cCell] (7.630,-5.040) rectangle (8.196,-5.280);
+  \fill[cCell] (8.196,-5.040) rectangle (8.761,-5.280);
+  \fill[cCell] (8.761,-5.040) rectangle (9.326,-5.280);
+  \fill[cCell] (9.891,-5.040) rectangle (10.457,-5.280);
+  \fill[cCell] (10.457,-5.040) rectangle (11.022,-5.280);
+  \fill[cCell] (11.022,-5.040) rectangle (11.587,-5.280);
+  \fill[cCell] (12.152,-5.040) rectangle (12.717,-5.280);
+  \draw[cellframe] (-0.283,0.000) rectangle (13.283,-5.280);
+  \node[collab] at (0.000,-5.330) {a0};
+  \node[collab] at (0.565,-5.330) {a1};
+  \node[collab] at (1.130,-5.330) {a2};
+  \node[collab] at (1.696,-5.330) {a3};
+  \node[collab] at (2.261,-5.330) {a4};
+  \node[collab] at (2.826,-5.330) {a5};
+  \node[collab] at (3.391,-5.330) {a6};
+  \node[collab] at (3.957,-5.330) {a7};
+  \node[collab] at (4.522,-5.330) {a8};
+  \node[collab] at (5.087,-5.330) {a9};
+  \node[collab] at (5.652,-5.330) {a10};
+  \node[collab] at (6.217,-5.330) {a11};
+  \node[collab] at (6.783,-5.330) {a12};
+  \node[collab] at (7.348,-5.330) {a13};
+  \node[collab] at (7.913,-5.330) {a14};
+  \node[collab] at (8.478,-5.330) {a15};
+  \node[collab] at (9.043,-5.330) {a16};
+  \node[collab] at (9.609,-5.330) {a17};
+  \node[collab] at (10.174,-5.330) {a18};
+  \node[collab] at (10.739,-5.330) {a19};
+  \node[collab] at (11.304,-5.330) {a20};
+  \node[collab] at (11.870,-5.330) {a21};
+  \node[collab] at (12.435,-5.330) {a22};
+  \node[collab] at (13.000,-5.330) {a23};
+  \node[panellab] at (-1.150,-2.640) {data};
+  \node[attr] (lna0) at (0.000,0.950) {};
+  \node[attr] (lna1) at (0.565,0.950) {};
+  \node[attr] (lna2) at (1.130,0.950) {};
+  \node[attr] (lna3) at (1.696,0.950) {};
+  \node[attr] (lna4) at (2.261,0.950) {};
+  \node[attr] (lna5) at (2.826,0.950) {};
+  \node[attr] (lna6) at (3.391,0.950) {};
+  \node[attr] (lna7) at (3.957,0.950) {};
+  \node[attr] (lna8) at (4.522,0.950) {};
+  \node[attr] (lna9) at (5.087,0.950) {};
+  \node[attr] (lna10) at (5.652,0.950) {};
+  \node[attr] (lna11) at (6.217,0.950) {};
+  \node[attr] (lna12) at (6.783,0.950) {};
+  \node[attr] (lna13) at (7.348,0.950) {};
+  \node[attr] (lna14) at (7.913,0.950) {};
+  \node[attr] (lna15) at (8.478,0.950) {};
+  \node[attr] (lna16) at (9.043,0.950) {};
+  \node[attr] (lna17) at (9.609,0.950) {};
+  \node[attr] (lna18) at (10.174,0.950) {};
+  \node[attr] (lna19) at (10.739,0.950) {};
+  \node[attr] (lna20) at (11.304,0.950) {};
+  \node[attr] (lna21) at (11.870,0.950) {};
+  \node[attr] (lna22) at (12.435,0.950) {};
+  \node[attr] (lna23) at (13.000,0.950) {};
+  \node[concept] (lnc24) at (9.609,2.000) {\tiny C24};
+  \node[concept, fill=cConcOn] (lnc25) at (7.913,2.000) {\tiny C25};
+  \node[concept] (lnc26) at (8.422,2.000) {\tiny C26};
+  \node[concept, fill=cConcOn] (lnc28) at (2.072,2.000) {\tiny C28};
+  \node[concept, fill=cConcOn] (lnc30) at (4.220,2.000) {\tiny C30};
+  \node[concept, fill=cConcOn] (lnc32) at (11.116,2.000) {\tiny C32};
+  \node[concept] (lnc34) at (3.203,2.000) {\tiny C34};
+  \node[concept, fill=cConcOn] (lnc35) at (3.712,2.000) {\tiny C35};
+  \node[concept, fill=cConcOn] (lnc37) at (8.761,3.050) {\tiny C37};
+  \node[concept] (lnc45) at (2.638,3.050) {\tiny C45};
+  \draw[edge] (lnc24) -- (lna20);
+  \draw[edge] (lnc24) -- (lna14);
+  \draw[edge] (lnc25) -- (lna13);
+  \draw[edge] (lnc25) -- (lna15);
+  \draw[edge] (lnc26) -- (lna16);
+  \draw[edge] (lnc26) -- (lna12);
+  \draw[edge] (lnc28) -- (lna0);
+  \draw[edge] (lnc28) -- (lna9);
+  \draw[edge] (lnc28) -- (lna2);
+  \draw[edge] (lnc30) -- (lna10);
+  \draw[edge] (lnc30) -- (lna3);
+  \draw[edge] (lnc30) -- (lna7);
+  \draw[edge] (lnc32) -- (lna18);
+  \draw[edge] (lnc32) -- (lna19);
+  \draw[edge] (lnc32) -- (lna22);
+  \draw[edge] (lnc34) -- (lna8);
+  \draw[edge] (lnc34) -- (lna4);
+  \draw[edge] (lnc34) -- (lna5);
+  \draw[edge] (lnc35) -- (lna1);
+  \draw[edge] (lnc35) -- (lna11);
+  \draw[edge] (lnc37) -- (lnc24);
+  \draw[edge] (lnc37) -- (lnc26);
+  \draw[edge] (lnc45) -- (lnc34);
+  \draw[edge] (lnc45) -- (lnc28);
+  \node[panellab] at (-1.150,2.000) {learned};
+\end{tikzpicture}\end{center}
+\medskip\noindent\textit{Rent} (bits lost if a node were removed; node colour):\par\begin{center}\begin{tikzpicture}
+  \node[attr] (rta0) at (0.000,0.000) {};
+  \node[attr] (rta1) at (0.565,0.000) {};
+  \node[attr] (rta2) at (1.130,0.000) {};
+  \node[attr] (rta3) at (1.696,0.000) {};
+  \node[attr] (rta4) at (2.261,0.000) {};
+  \node[attr] (rta5) at (2.826,0.000) {};
+  \node[attr] (rta6) at (3.391,0.000) {};
+  \node[attr] (rta7) at (3.957,0.000) {};
+  \node[attr] (rta8) at (4.522,0.000) {};
+  \node[attr] (rta9) at (5.087,0.000) {};
+  \node[attr] (rta10) at (5.652,0.000) {};
+  \node[attr] (rta11) at (6.217,0.000) {};
+  \node[attr] (rta12) at (6.783,0.000) {};
+  \node[attr] (rta13) at (7.348,0.000) {};
+  \node[attr] (rta14) at (7.913,0.000) {};
+  \node[attr] (rta15) at (8.478,0.000) {};
+  \node[attr] (rta16) at (9.043,0.000) {};
+  \node[attr] (rta17) at (9.609,0.000) {};
+  \node[attr] (rta18) at (10.174,0.000) {};
+  \node[attr] (rta19) at (10.739,0.000) {};
+  \node[attr] (rta20) at (11.304,0.000) {};
+  \node[attr] (rta21) at (11.870,0.000) {};
+  \node[attr] (rta22) at (12.435,0.000) {};
+  \node[attr] (rta23) at (13.000,0.000) {};
+  \definecolor{rcrt24}{rgb}{0.883,0.954,0.663}
+  \node[concept, fill=rcrt24, text=black] (rtc24) at (9.609,1.050) {\tiny C24};
+  \definecolor{rcrt25}{rgb}{0.474,0.778,0.476}
+  \node[concept, fill=rcrt25, text=black] (rtc25) at (7.913,1.050) {\tiny C25};
+  \definecolor{rcrt26}{rgb}{0.869,0.948,0.652}
+  \node[concept, fill=rcrt26, text=black] (rtc26) at (8.422,1.050) {\tiny C26};
+  \definecolor{rcrt28}{rgb}{0.559,0.815,0.509}
+  \node[concept, fill=rcrt28, text=black] (rtc28) at (2.072,1.050) {\tiny C28};
+  \definecolor{rcrt30}{rgb}{0.000,0.271,0.161}
+  \node[concept, fill=rcrt30, text=white] (rtc30) at (4.220,1.050) {\tiny C30};
+  \definecolor{rcrt32}{rgb}{0.000,0.271,0.161}
+  \node[concept, fill=rcrt32, text=white] (rtc32) at (11.116,1.050) {\tiny C32};
+  \definecolor{rcrt34}{rgb}{0.454,0.768,0.466}
+  \node[concept, fill=rcrt34, text=black] (rtc34) at (3.203,1.050) {\tiny C34};
+  \definecolor{rcrt35}{rgb}{0.474,0.778,0.476}
+  \node[concept, fill=rcrt35, text=black] (rtc35) at (3.712,1.050) {\tiny C35};
+  \definecolor{rcrt37}{rgb}{0.986,0.995,0.822}
+  \node[concept, fill=rcrt37, text=black] (rtc37) at (8.761,2.100) {\tiny C37};
+  \definecolor{rcrt45}{rgb}{0.994,0.998,0.866}
+  \node[concept, fill=rcrt45, text=black] (rtc45) at (2.638,2.100) {\tiny C45};
+  \draw[edge] (rtc24) -- (rta20);
+  \draw[edge] (rtc24) -- (rta14);
+  \draw[edge] (rtc25) -- (rta13);
+  \draw[edge] (rtc25) -- (rta15);
+  \draw[edge] (rtc26) -- (rta16);
+  \draw[edge] (rtc26) -- (rta12);
+  \draw[edge] (rtc28) -- (rta0);
+  \draw[edge] (rtc28) -- (rta9);
+  \draw[edge] (rtc28) -- (rta2);
+  \draw[edge] (rtc30) -- (rta10);
+  \draw[edge] (rtc30) -- (rta3);
+  \draw[edge] (rtc30) -- (rta7);
+  \draw[edge] (rtc32) -- (rta18);
+  \draw[edge] (rtc32) -- (rta19);
+  \draw[edge] (rtc32) -- (rta22);
+  \draw[edge] (rtc34) -- (rta8);
+  \draw[edge] (rtc34) -- (rta4);
+  \draw[edge] (rtc34) -- (rta5);
+  \draw[edge] (rtc35) -- (rta1);
+  \draw[edge] (rtc35) -- (rta11);
+  \draw[edge] (rtc37) -- (rtc24);
+  \draw[edge] (rtc37) -- (rtc26);
+  \draw[edge] (rtc45) -- (rtc34);
+  \draw[edge] (rtc45) -- (rtc28);
+  \node[rentval] at (9.609,0.710) {643\,b};
+  \node[rentval] at (7.913,0.710) {1481\,b};
+  \node[rentval] at (8.422,0.710) {689\,b};
+  \node[rentval] at (2.072,0.710) {1327\,b};
+  \node[rentval] at (4.220,0.710) {2976\,b};
+  \node[rentval] at (11.116,0.710) {2974\,b};
+  \node[rentval] at (3.203,0.710) {1514\,b};
+  \node[rentval] at (3.712,0.710) {1480\,b};
+  \node[rentval] at (8.761,1.760) {170\,b};
+  \node[rentval] at (2.638,1.760) {81\,b};
+  \definecolor{cb0}{rgb}{1.000,1.000,0.898}
+  \fill[cb0] (13.600,0.000) rectangle (14.050,0.087);
+  \definecolor{cb1}{rgb}{0.990,0.996,0.844}
+  \fill[cb1] (13.600,0.087) rectangle (14.050,0.175);
+  \definecolor{cb2}{rgb}{0.979,0.992,0.784}
+  \fill[cb2] (13.600,0.175) rectangle (14.050,0.263);
+  \definecolor{cb3}{rgb}{0.968,0.988,0.725}
+  \fill[cb3] (13.600,0.263) rectangle (14.050,0.350);
+  \definecolor{cb4}{rgb}{0.931,0.973,0.698}
+  \fill[cb4] (13.600,0.350) rectangle (14.050,0.438);
+  \definecolor{cb5}{rgb}{0.891,0.957,0.668}
+  \fill[cb5] (13.600,0.438) rectangle (14.050,0.525);
+  \definecolor{cb6}{rgb}{0.850,0.941,0.639}
+  \fill[cb6] (13.600,0.525) rectangle (14.050,0.613);
+  \definecolor{cb7}{rgb}{0.795,0.917,0.613}
+  \fill[cb7] (13.600,0.613) rectangle (14.050,0.700);
+  \definecolor{cb8}{rgb}{0.736,0.892,0.584}
+  \fill[cb8] (13.600,0.700) rectangle (14.050,0.788);
+  \definecolor{cb9}{rgb}{0.676,0.866,0.556}
+  \fill[cb9] (13.600,0.788) rectangle (14.050,0.875);
+  \definecolor{cb10}{rgb}{0.611,0.837,0.530}
+  \fill[cb10] (13.600,0.875) rectangle (14.050,0.963);
+  \definecolor{cb11}{rgb}{0.539,0.806,0.502}
+  \fill[cb11] (13.600,0.963) rectangle (14.050,1.050);
+  \definecolor{cb12}{rgb}{0.467,0.775,0.473}
+  \fill[cb12] (13.600,1.050) rectangle (14.050,1.137);
+  \definecolor{cb13}{rgb}{0.400,0.742,0.438}
+  \fill[cb13] (13.600,1.137) rectangle (14.050,1.225);
+  \definecolor{cb14}{rgb}{0.325,0.705,0.400}
+  \fill[cb14] (13.600,1.225) rectangle (14.050,1.312);
+  \definecolor{cb15}{rgb}{0.253,0.668,0.363}
+  \fill[cb15] (13.600,1.312) rectangle (14.050,1.400);
+  \definecolor{cb16}{rgb}{0.216,0.620,0.331}
+  \fill[cb16] (13.600,1.400) rectangle (14.050,1.488);
+  \definecolor{cb17}{rgb}{0.175,0.567,0.296}
+  \fill[cb17] (13.600,1.488) rectangle (14.050,1.575);
+  \definecolor{cb18}{rgb}{0.134,0.515,0.262}
+  \fill[cb18] (13.600,1.575) rectangle (14.050,1.663);
+  \definecolor{cb19}{rgb}{0.091,0.481,0.247}
+  \fill[cb19] (13.600,1.663) rectangle (14.050,1.750);
+  \definecolor{cb20}{rgb}{0.044,0.443,0.231}
+  \fill[cb20] (13.600,1.750) rectangle (14.050,1.838);
+  \definecolor{cb21}{rgb}{0.000,0.404,0.214}
+  \fill[cb21] (13.600,1.838) rectangle (14.050,1.925);
+  \definecolor{cb22}{rgb}{0.000,0.361,0.197}
+  \fill[cb22] (13.600,1.925) rectangle (14.050,2.013);
+  \definecolor{cb23}{rgb}{0.000,0.314,0.178}
+  \fill[cb23] (13.600,2.013) rectangle (14.050,2.100);
+  \draw[cellframe] (13.600,0.000) rectangle (14.050,2.100);
+  \node[cblab] at (14.150,0.000) {0};
+  \node[cblab] at (14.150,2.100) {2976\,b};
+\end{tikzpicture}\end{center}
+\begin{center}\begin{tikzpicture}
+\begin{axis}[cltraj, xlabel={accepted move}, ylabel={total $L$ (bits)}]
+  \addplot[cLine] coordinates {(0,31550) (1,30534) (2,29568) (3,28628) (4,27697) (5,26695) (6,25738) (7,24732) (8,23782) (9,22847) (10,21897) (11,20939) (12,20048) (13,20004) (14,19971) (15,19946) (16,19915) (17,19897) (18,19878) (19,19862) (20,19838) (21,19825) (22,19139) (23,19058) (24,19044) (25,19030) (26,19016) (27,19001) (28,18983) (29,18965) (30,18947) (31,18930) (32,18912) (33,18894) (34,18877) (35,18859)};
+\end{axis}
+\begin{axis}[cldelta, xlabel={accepted move}, ylabel={$\Delta L$ (bits)}]
+  \addplot[ybar, bar width=3pt, draw=cAmberE, fill=cGood] coordinates {(0,-1016) (1,-966) (2,-940) (3,-931) (4,-1002) (5,-957) (6,-1006) (7,-951) (8,-935) (9,-950) (10,-958) (11,-891) (12,-44) (13,-33) (14,-25) (15,-31) (16,-18) (17,-19) (18,-16) (19,-24) (20,-13) (21,-686) (22,-80) (23,-14) (24,-14) (25,-14) (26,-14) (27,-18) (28,-18) (29,-18) (30,-18) (31,-18) (32,-18) (33,-18) (34,-18)};
+\end{axis}
+\end{tikzpicture}\end{center}
+\clearpage
+\end{document}
