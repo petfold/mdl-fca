@@ -74,6 +74,43 @@ motivation: interpreting a learned sparse representation as an ontology.
 - Deterministic closure (v1) vs noisy propagation (v4): the v1 noise model puts
   all stochasticity at the observation layer.
 
+## 9. Performance and scaling
+Profiling (cProfile, 4000×40, 3-level) shows the batch **E-step**
+(`encode_object`) is ~94% of runtime; numpy is only at the I/O edges, so the hot
+path is pure-Python — the worry is real for large real data. Priorities, cheapest
+first; **optimise only after confirming greedy suffices** (§1/§3: restart-variance
+and gap-to-reference study — a rugged landscape or a scoring limit like the
+overlap rent is not fixed by a faster inner loop).
+
+**Done (low-hanging, no new deps):**
+- Cached **concept-reachability bitmask** (`DAG._reach_concepts`) makes
+  `reachable()` an O(1) bit test instead of a per-call DFS — it was ~45% of
+  runtime. Invalidated with the closure cache on every edge add / concept remove.
+- Hoisted the per-object **activation price and closure masks** out of the
+  encoder's inner loop (constant while one object is encoded), and inlined
+  `is_attribute` (87M calls) as `k < n_attrs` in the hot paths.
+- Result: ~1.7× on medium planted problems with **identical** output (same L,
+  concepts, moves); `reachable` no longer dominates. Remaining cost is the
+  encoder's inner item×round arithmetic — the boundary for the next tier.
+
+**Next tiers (deferred):**
+- **Vectorise the E-step** across items/objects with numpy (batch the
+  ones/zeros/gain arithmetic and the coverage masks) — stays pure Python + numpy.
+- **Multicore E-step:** encoding each object in a pass is embarrassingly parallel
+  (DAG read-only, results merged). GIL means threads won't help pure Python; use
+  multiprocessing/joblib now, or a GIL-releasing compiled kernel later.
+- **Compile the inner kernel** (`encode_object` + counter updates, a few hundred
+  lines) in Cython/numba or Rust via PyO3, keeping orchestration in Python:
+  ~50–200× and frees the GIL for real threads. A full Rust rewrite is premature
+  and would cost the "readable and hackable" property.
+- **Distributed:** the batch E-step is a textbook map-reduce over **additive
+  sufficient statistics** — the "scorer talks only to the counter store"
+  commitment is exactly what enables it: broadcast the DAG, each worker encodes
+  its object shard and returns summed usage/pair counts, the driver reduces and
+  runs the (serial) structural search. Parallelism is within a greedy round, not
+  across the sequence. Watch the pairwise co-usage store (O(items²) sparse) as the
+  communication/shuffle cost at scale.
+
 ## Positioning sentence for the eventual paper
 Slim/Krimp generalized from a flat code table to a DAG with closure semantics —
 equivalently, a probabilistic/MDL Formal Concept Analysis that only posits a

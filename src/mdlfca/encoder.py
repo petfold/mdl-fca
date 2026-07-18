@@ -59,32 +59,39 @@ def encode_object(x_mask: int, dag, counters, tol: float = 1e-9,
     gain_one = log2((1 - eps_minus) / eps_plus)   # newly covered observed-1
     gain_zero = log2(eps_minus / (1 - eps_plus))  # newly covered observed-0 (negative)
 
+    items = dag.items()
+    # The counters do not change while a single object is being encoded, so the
+    # per-item closure mask and activation price are constant across the greedy
+    # rounds below — compute them once instead of inside the inner loop.
+    clm = {k: dag.closure_mask(k) for k in items}
+    act = {k: activation_cost_bits(counters, k) for k in items}
+    reachable = dag.reachable
+
     code: set[int] = set()
     covered = 0
-    items = dag.items()
     while True:
         best_gain = tol
         best = None
         for k in items:
             if k in code:
                 continue
-            new = dag.closure_mask(k) & ~covered
+            new = clm[k] & ~covered
             if new == 0:
                 continue
             ones = (new & x_mask).bit_count()
             zeros = new.bit_count() - ones
-            g = gain_one * ones + gain_zero * zeros - activation_cost_bits(counters, k)
+            g = gain_one * ones + gain_zero * zeros - act[k]
             # adding k retires any current item below it (antichain): refund it
             for s in code:
-                if dag.reachable(k, s):
-                    g += activation_cost_bits(counters, s)
+                if reachable(k, s):
+                    g += act[s]
             if g > best_gain:
                 best_gain = g
                 best = k
         if best is None:
             break
-        covered |= dag.closure_mask(best)
-        code = {s for s in code if not dag.reachable(best, s)}
+        covered |= clm[best]
+        code = {s for s in code if not reachable(best, s)}
         code.add(best)
 
     n_fp = (x_mask & ~covered).bit_count()
