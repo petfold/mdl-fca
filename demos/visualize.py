@@ -57,8 +57,9 @@ COL = dict(attr="#cfe0ee", attr_on="#ffd27f", concept="#f2c48a", concept_on="#e8
            attr_edge="#31597a", concept_edge="#7a4a12")
 
 
-def _draw_dag(ax, dag, A, active, panel_label):
-    """Draw one DAG into `ax` with attribute sinks aligned to columns 0..A-1."""
+def _draw_dag(ax, dag, A, active, panel_label, notes=None):
+    """Draw one DAG into `ax` with attribute sinks aligned to columns 0..A-1.
+    `notes` optionally maps a concept id to a short string drawn under its node."""
     x, y = _node_layout(dag)
     ymax = max(y.values()) if y else 0
     for c in dag.concepts:
@@ -70,6 +71,9 @@ def _draw_dag(ax, dag, A, active, panel_label):
                    color=COL["concept_on"] if on else COL["concept"],
                    edgecolors=COL["concept_edge"])
         ax.text(x[c], y[c], f"C{c}", ha="center", va="center", fontsize=7.5, zorder=3)
+        if notes and c in notes:
+            ax.annotate(notes[c], (x[c], y[c]), (0, -13), textcoords="offset points",
+                        ha="center", va="top", fontsize=6.5, color="#1b4f2a", zorder=4)
     for a in range(A):
         on = active is not None and a in active
         ax.scatter([a], [0], s=240, zorder=2,
@@ -150,6 +154,58 @@ def plot_overview(res, dag, planted, png_path, active=None, n_show=40):
                loc="upper center", ncol=3, fontsize=8, frameon=True,
                bbox_to_anchor=(0.5, 1.005))
     fig.suptitle("planted vs. learned concept DAG, aligned to the data columns", y=1.03)
+    fig.savefig(png_path, dpi=120, bbox_inches="tight")
+    plt.close(fig)
+    print(f"  wrote {png_path}")
+
+
+def plot_rent(res, png_path, title=""):
+    """Attribute the codelength saving to each concept via its 'rent': the bits
+    total L would RISE if that concept were removed now and its uses rerouted to
+    its children (Scorer.delta_remove_concept, the exact leave-one-out value the
+    pruning sweep uses). Positive => the node earns its keep by that many bits.
+
+    This is a marginal / leave-one-out attribution, evaluated with all other
+    nodes present, so the per-node values do NOT sum to the total saving: the
+    hierarchy's value is partly joint (a mid concept is only cheap because its
+    base children exist). It is the honest 'does this node pay rent?' number.
+    """
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    from mdlfca.codelength import Scorer
+
+    dag = res.dag
+    scorer = Scorer(dag, res.counters)
+    concepts = list(dag.concepts)
+    if not concepts:
+        return
+    rent = {c: scorer.delta_remove_concept(c) for c in concepts}
+    usage = {c: res.counters.usage_of(c) for c in concepts}
+    A = dag.n_attrs
+    notes = {c: f"{rent[c]:.0f} b" for c in concepts}
+
+    ln_ymax = max(_node_layout(dag)[1].values())
+    fig, (axd, axb) = plt.subplots(
+        2, 1, figsize=(max(8, A * 0.55), 9),
+        gridspec_kw=dict(height_ratios=[ln_ymax + 1.6, 5], hspace=0.28))
+
+    _draw_dag(axd, dag, A, None, "learned", notes=notes)
+    axd.set_title(f"rent per concept — bits lost if the node were removed  ({title})")
+
+    order = sorted(concepts, key=lambda c: rent[c], reverse=True)
+    vals = [rent[c] for c in order]
+    axb.bar(range(len(order)), vals,
+            color=["#2a8c50" if v >= 0 else "#be3c3c" for v in vals],
+            edgecolor="#7a4a12")
+    axb.axhline(0, color="#555", lw=0.8)
+    axb.set_xticks(range(len(order)))
+    axb.set_xticklabels([f"C{c}\n(n={usage[c]})" for c in order], fontsize=7)
+    axb.set_ylabel("rent (bits earned by keeping)")
+    axb.set_title("per-concept rent, sorted  (n = objects that explicitly use the concept)")
+    axb.grid(axis="y", alpha=0.3)
+
     fig.savefig(png_path, dpi=120, bbox_inches="tight")
     plt.close(fig)
     print(f"  wrote {png_path}")
@@ -243,6 +299,7 @@ def main():
                       active=example)
         plot_codelength(res, planted_L, os.path.join(OUT, f"{name}_codelength.png"),
                         title=title)
+        plot_rent(res, os.path.join(OUT, f"{name}_rent.png"), title=title)
 
     print(f"\nDone. See {OUT}/")
 
