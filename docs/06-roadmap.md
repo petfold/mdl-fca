@@ -93,16 +93,42 @@ overlap rent is not fixed by a faster inner loop).
   concepts, moves); `reachable` no longer dominates. Remaining cost is the
   encoder's inner item×round arithmetic — the boundary for the next tier.
 
-**Next tiers (deferred):**
-- **Vectorise the E-step** across items/objects with numpy (batch the
-  ones/zeros/gain arithmetic and the coverage masks) — stays pure Python + numpy.
-- **Multicore E-step:** encoding each object in a pass is embarrassingly parallel
-  (DAG read-only, results merged). GIL means threads won't help pure Python; use
-  multiprocessing/joblib now, or a GIL-releasing compiled kernel later.
+**Vectorisation — measured, and the axis that matters.** The E-step's big
+dimension is the **objects (rows)**, not the candidate items (columns): objects
+are independent given the fixed DAG in a pass, so they can be encoded in
+**lock-step blocks** (all objects do greedy round 1 together, round 2 together,
+with a boolean "still improving" mask retiring objects as they finish). We
+benchmarked three forms against the scalar loop, all producing *identical* output:
+- *Per-item vectorisation within one object* (wrong axis): **slower** everywhere
+  (0.5–0.8×) — numpy dispatch overhead per object dominates.
+- *Row-batched, dense boolean* `(B, items, attrs)`: ~1.3× up to ~60 attributes,
+  then **regresses below 1×** by 100 attributes — the dense array is O(B·items·attrs)
+  memory-bound.
+- *Row-batched, bit-packed* (uint8 words + popcount LUT): ~1.2–1.6× and holds at
+  scale (1.37× at 160 attributes).
+
+Key finding: the payoff is only a modest **constant factor (~1.4×)**, because the
+scalar baseline is *not* naive Python arithmetic — closure/coverage run on
+CPython's C-level arbitrary-precision integer bit operations. numpy is competing
+with compiled code, so it wins only modestly. Order-of-magnitude speed needs a
+compiled kernel and/or multiple cores, below. Not shipped: the ~1.4× doesn't
+justify the added complexity yet, and the row-block is really the unit for
+multicore. Benchmarks kept for the eventual kernel/parallel work.
+
+**Next tiers (deferred) — where the real speed is:**
+- **Multicore over row-blocks (likely the biggest practical lever).** The
+  vectorisation study confirmed objects are independent within a pass, so a pass
+  splits into row-blocks that encode fully in parallel and merge their sufficient
+  statistics — near-linear in cores. GIL means threads won't help pure Python;
+  use multiprocessing/joblib now (broadcast DAG, map over object shards, reduce
+  counts), or a GIL-releasing compiled kernel for threads. This is orthogonal to,
+  and larger than, the ~1.4× SIMD win.
 - **Compile the inner kernel** (`encode_object` + counter updates, a few hundred
   lines) in Cython/numba or Rust via PyO3, keeping orchestration in Python:
-  ~50–200× and frees the GIL for real threads. A full Rust rewrite is premature
-  and would cost the "readable and hackable" property.
+  packed-bitset ops with hardware POPCNT (no per-round 3D materialisation) plus a
+  freed GIL for real threads — this is where order-of-magnitude gains live, not in
+  pure numpy. A full Rust rewrite is premature and would cost the "readable and
+  hackable" property.
 - **Distributed:** the batch E-step is a textbook map-reduce over **additive
   sufficient statistics** — the "scorer talks only to the counter store"
   commitment is exactly what enables it: broadcast the DAG, each worker encodes
