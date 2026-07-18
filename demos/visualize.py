@@ -54,32 +54,95 @@ def render_dot(dot_src, png_path):
     print(f"  wrote {png_path}")
 
 
-def plot_codes(res, dag, png_path):
+def _node_layout(dag):
+    """x = mean attribute-column index the node covers; y = depth above attrs."""
+    attrs_of = {a: {a} for a in range(dag.n_attrs)}
+    for c in dag.concepts:
+        attrs_of[c] = {a for a in dag.closure(c) if dag.is_attribute(a)}
+
+    def depth(node, seen=None):
+        if dag.is_attribute(node):
+            return 0
+        seen = seen or set()
+        return 1 + max((depth(ch, seen | {node}) for ch in dag.children[node]),
+                       default=0)
+
+    x = {n: (n if dag.is_attribute(n) else float(np.mean(sorted(attrs_of[n]))))
+         for n in list(range(dag.n_attrs)) + list(dag.concepts)}
+    y = {n: depth(n) for n in x}
+
+    # spread out concepts that share a level and sit too close (min gap 0.9)
+    by_level = {}
+    for c in dag.concepts:
+        by_level.setdefault(y[c], []).append(c)
+    for level, nodes in by_level.items():
+        nodes.sort(key=lambda c: x[c])
+        for prev, cur in zip(nodes, nodes[1:]):
+            if x[cur] - x[prev] < 0.9:
+                x[cur] = x[prev] + 0.9
+    return x, y
+
+
+def plot_dag_over_matrix(res, dag, png_path, active=None, n_show=40):
+    """Data array with the learned DAG drawn on top, each attribute node aligned
+    to its column. Objects are sorted by their predicted attribute pattern so the
+    blocks a concept generates line up under it."""
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
-    concepts = sorted(dag.concepts)
-    items = list(range(dag.n_attrs)) + concepts
-    labels = [f"a{a}" for a in range(dag.n_attrs)] + [f"C{c}" for c in concepts]
-    idx = {it: j for j, it in enumerate(items)}
+    A = dag.n_attrs
+    # predicted attributes per object (closure of the code) drive the row order
+    pred = []
+    for code in res.codes:
+        m = 0
+        for k in code:
+            m |= dag.closure_mask(k) if not dag.is_attribute(k) else (1 << k)
+        pred.append(m)
+    # sample evenly across the sorted range so sparse-to-dense variety shows
+    ranked = sorted(range(len(res.codes)), key=lambda i: pred[i])
+    if len(ranked) > n_show:
+        picks = np.linspace(0, len(ranked) - 1, n_show).round().astype(int)
+        order = [ranked[j] for j in picks]
+    else:
+        order = ranked
+    M = np.array([[(pred[i] >> a) & 1 for a in range(A)] for i in order], dtype=float)
 
-    # show a sample of objects to keep it readable
-    n_show = min(60, len(res.codes))
-    M = np.zeros((n_show, len(items)))
-    for i in range(n_show):
-        for it in res.codes[i]:
-            M[i, idx[it]] = 1
+    x, y = _node_layout(dag)
+    ymax = max(y.values())
 
-    fig, ax = plt.subplots(figsize=(max(6, len(items) * 0.28), 8))
-    ax.imshow(M, aspect="auto", cmap="Blues", interpolation="nearest")
-    ax.axvline(dag.n_attrs - 0.5, color="crimson", lw=1.2)
-    ax.set_xticks(range(len(items)))
-    ax.set_xticklabels(labels, rotation=90, fontsize=7)
-    ax.set_ylabel(f"objects (first {n_show})")
-    ax.set_title("object codes: activated items (attributes | concepts)")
-    fig.tight_layout()
-    fig.savefig(png_path, dpi=120)
+    fig, (axd, axm) = plt.subplots(
+        2, 1, figsize=(max(7, A * 0.55), 9),
+        gridspec_kw=dict(height_ratios=[ymax + 1.2, 5], hspace=0.05))
+
+    # ---- DAG on top ----
+    for c in dag.concepts:
+        for ch in dag.children[c]:
+            axd.plot([x[c], x[ch]], [y[c], y[ch]], "-", color="#b9b9b9", lw=1, zorder=1)
+    for c in dag.concepts:
+        on = active is not None and c in active
+        axd.scatter([x[c]], [y[c]], s=520, marker="s", zorder=2,
+                    color="#e8873a" if on else "#f2c48a", edgecolors="#7a4a12")
+        axd.text(x[c], y[c], f"C{c}", ha="center", va="center", fontsize=8, zorder=3)
+    for a in range(A):
+        on = active is not None and a in active
+        axd.scatter([a], [0], s=300, zorder=2,
+                    color="#ffd27f" if on else "#cfe0ee", edgecolors="#31597a")
+    axd.set_xlim(-0.7, A - 0.3)
+    axd.set_ylim(-0.6, ymax + 0.6)
+    axd.axis("off")
+    axd.set_title("learned concept DAG (sinks aligned to the columns below)")
+
+    # ---- data array below, columns aligned ----
+    axm.imshow(M, aspect="auto", cmap="Blues", interpolation="nearest",
+               extent=[-0.5, A - 0.5, n_show - 0.5, -0.5])
+    axm.set_xlim(-0.7, A - 0.3)
+    axm.set_xticks(range(A))
+    axm.set_xticklabels([f"a{a}" for a in range(A)], fontsize=8)
+    axm.set_ylabel(f"objects (sorted, first {n_show})")
+    axm.set_title("predicted attributes per object", fontsize=10)
+
+    fig.savefig(png_path, dpi=120, bbox_inches="tight")
     plt.close(fig)
     print(f"  wrote {png_path}")
 
@@ -132,7 +195,7 @@ def main():
     render_dot(dag_to_dot(res.dag, f"learned DAG (object 0 code highlighted: {sorted(example)})",
                           active=example),
                os.path.join(OUT, "dag_learned.png"))
-    plot_codes(res, res.dag, os.path.join(OUT, "codes.png"))
+    plot_dag_over_matrix(res, res.dag, os.path.join(OUT, "codes.png"), active=example)
     plot_codelength(res, planted_L, os.path.join(OUT, "codelength.png"))
     print(f"\nDone. See {OUT}/")
 
