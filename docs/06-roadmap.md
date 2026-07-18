@@ -50,6 +50,28 @@ noisy-OR is underexplored — possibly the genuinely novel headline contribution
 beyond the DAG-Krimp core. Connects directly to redundancy reduction, factorial
 codes, sparse coding (Barlow, Atick, Földiák).
 
+**Result (2026-07-18): factorisation is emergent, no penalty needed.** Over
+*disjoint* attribute alphabets, the coproduct (disjoint union) of two closure
+DAGs generates *exactly* the direct product of the lattices they generate
+individually — additive generator (m+n nodes), multiplicative lattice (m·n
+concepts). Proved decoder-agnostically (any *separable* decoder factors) in
+`note/product-of-dags-note.tex`. So the current learner already returns the
+"product of DAGs": handed two independent planted hierarchies it returns the two
+factors as disconnected components with **zero cross-block concepts**, carrying
+the product in the object codes (`tests/test_product.py`,
+`note/product-experiment.py`). No block-structure prior or MI penalty is
+required — under independence a cross-factor concept has PMI ≈ 0 and cannot pay
+its usage rent. Keep two conditions distinct: disjoint alphabets is *algebra*
+(needed for the identity); statistical independence is *statistics* (needed only
+for the learner to *prefer* the coproduct — dependent factors → a *partial*
+product with a few bridge concepts, the open case to characterise). Classical
+framing: apposition lattice = subdirect product (Ganter–Wille); factoring a
+built lattice = Birkhoff subdirect decomposition (hard); building factors direct
+sidesteps it. Follow-up: emit the factors as first-class output (connected
+components of the loading graph — a linear-time post-step). Overlap *within* a
+block is the genuinely hard case and coincides with the §1 / docs 02 overlap
+limitation.
+
 ## 6. Baselines to implement for the paper
 - Full FCA lattice size (already in prototype as a display number); iceberg
   lattices and Kuznetsov's **concept stability** as FCA-native pruning baselines.

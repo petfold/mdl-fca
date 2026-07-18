@@ -1,0 +1,63 @@
+// Graphviz source for the coproduct G1 |_| G2 of Figure 2 of
+// product-of-dags-note.tex (two one-factor closure DAGs over DISJOINT
+// attribute alphabets). The two clusters have NO edges between them --
+// that disjointness is the whole content of the "coproduct" and is why
+// downward-closure decoding generates the DIRECT PRODUCT lattice (Fig 3).
+//
+// Render (dot2tex is not required):
+//     dot -Tpdf factor-dags.dot -o factor-dags.pdf
+//     dot -Tpng factor-dags.dot -o factor-dags.png
+// Optional TikZ output via dot2tex, if installed:
+//     dot2tex --format tikz --texmode math factor-dags.dot > factor-dags.tex
+//
+// The .tex note ships its own self-contained TikZ version of this figure;
+// this .dot file is kept so the graph can be regenerated / restyled with
+// Graphviz and so nothing about the example is lost.
+
+digraph coproduct {
+    rankdir=TB;
+    node [fontname="Helvetica"];
+    edge [arrowsize=0.7, color="#9a9a9a"];
+
+    // ---- Factor G1 ("size" axis) : attributes a1,a2,a3 -----------------
+    subgraph cluster_G1 {
+        label = "G1  (\"size\")";
+        labelloc = b;
+        fontname = "Helvetica-Bold";
+        color = "#4682b4";
+        style = rounded;
+
+        R1 [label="R", shape=box, style="rounded,filled", fillcolor="#4682b4", fontcolor=white];
+        P1 [label="P", shape=box, style="rounded,filled", fillcolor="#4682b4", fontcolor=white];
+        a1 [label="a1", shape=circle, style=filled, fillcolor="#cfe0ee"];
+        a2 [label="a2", shape=circle, style=filled, fillcolor="#cfe0ee"];
+        a3 [label="a3", shape=circle, style=filled, fillcolor="#cfe0ee"];
+
+        R1 -> P1;
+        R1 -> a3;
+        P1 -> a1;
+        P1 -> a2;
+    }
+
+    // ---- Factor G2 ("colour" axis) : attributes b1,b2,b3 ---------------
+    subgraph cluster_G2 {
+        label = "G2  (\"colour\")";
+        labelloc = b;
+        fontname = "Helvetica-Bold";
+        color = "#9650a0";
+        style = rounded;
+
+        S2 [label="S", shape=box, style="rounded,filled", fillcolor="#9650a0", fontcolor=white];
+        Q2 [label="Q", shape=box, style="rounded,filled", fillcolor="#9650a0", fontcolor=white];
+        b1 [label="b1", shape=circle, style=filled, fillcolor="#e6d5ec"];
+        b2 [label="b2", shape=circle, style=filled, fillcolor="#e6d5ec"];
+        b3 [label="b3", shape=circle, style=filled, fillcolor="#e6d5ec"];
+
+        S2 -> Q2;
+        S2 -> b3;
+        Q2 -> b1;
+        Q2 -> b2;
+    }
+
+    // NO edges between cluster_G1 and cluster_G2: that is the coproduct.
+}
