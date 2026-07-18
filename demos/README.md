@@ -30,14 +30,14 @@ For each scenario the outputs are:
 - `<name>_rent.png` — "earning its keep" per concept. Each node is priced by its
   **rent**: the bits total L would *rise* if that node were removed now and its
   uses rerouted to its children (`Scorer.delta_remove_concept`, the exact
-  leave-one-out value the pruning sweep uses). The learned DAG is annotated with
-  each node's rent, and a sorted bar chart shows the distribution (with n = how
-  many objects use each concept). Positive rent = the node pays for itself.
-  Note this is a *marginal / leave-one-out* attribution with all other nodes
-  present, so per-node rents do **not** sum to the total saving — the hierarchy's
-  value is partly joint (a mid concept is cheap only because its base children
-  exist). Empirically the base concepts carry most of the rent while the top
-  concepts earn less at the margin even when heavily used.
+  leave-one-out value the pruning sweep uses). Encoding: node **colour** = rent
+  (colourbar), node **shape** = type (square = concept, circle = attribute sink;
+  sinks have no rent and are drawn neutral). Positive rent = the node pays for
+  itself. Note this is a *marginal / leave-one-out* attribution with all other
+  nodes present, so per-node rents do **not** sum to the total saving — the
+  hierarchy's value is partly joint (a mid concept is cheap only because its base
+  children exist). Empirically the base concepts carry most of the rent (dark)
+  while the top concepts earn less at the margin (pale) even when heavily used.
 
 Run:
 

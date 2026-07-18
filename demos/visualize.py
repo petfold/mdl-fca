@@ -57,9 +57,8 @@ COL = dict(attr="#cfe0ee", attr_on="#ffd27f", concept="#f2c48a", concept_on="#e8
            attr_edge="#31597a", concept_edge="#7a4a12")
 
 
-def _draw_dag(ax, dag, A, active, panel_label, notes=None):
-    """Draw one DAG into `ax` with attribute sinks aligned to columns 0..A-1.
-    `notes` optionally maps a concept id to a short string drawn under its node."""
+def _draw_dag(ax, dag, A, active, panel_label):
+    """Draw one DAG into `ax` with attribute sinks aligned to columns 0..A-1."""
     x, y = _node_layout(dag)
     ymax = max(y.values()) if y else 0
     for c in dag.concepts:
@@ -71,9 +70,6 @@ def _draw_dag(ax, dag, A, active, panel_label, notes=None):
                    color=COL["concept_on"] if on else COL["concept"],
                    edgecolors=COL["concept_edge"])
         ax.text(x[c], y[c], f"C{c}", ha="center", va="center", fontsize=7.5, zorder=3)
-        if notes and c in notes:
-            ax.annotate(notes[c], (x[c], y[c]), (0, -13), textcoords="offset points",
-                        ha="center", va="top", fontsize=6.5, color="#1b4f2a", zorder=4)
     for a in range(A):
         on = active is not None and a in active
         ax.scatter([a], [0], s=240, zorder=2,
@@ -160,19 +156,23 @@ def plot_overview(res, dag, planted, png_path, active=None, n_show=40):
 
 
 def plot_rent(res, png_path, title=""):
-    """Attribute the codelength saving to each concept via its 'rent': the bits
-    total L would RISE if that concept were removed now and its uses rerouted to
-    its children (Scorer.delta_remove_concept, the exact leave-one-out value the
-    pruning sweep uses). Positive => the node earns its keep by that many bits.
+    """Colour each node by its 'rent': the bits total L would RISE if the node
+    were removed now and its uses rerouted to its children
+    (Scorer.delta_remove_concept, the exact leave-one-out value the pruning
+    sweep uses). Positive => the node earns its keep by that many bits.
 
-    This is a marginal / leave-one-out attribution, evaluated with all other
-    nodes present, so the per-node values do NOT sum to the total saving: the
-    hierarchy's value is partly joint (a mid concept is only cheap because its
-    base children exist). It is the honest 'does this node pay rent?' number.
+    Encoding: node COLOUR = rent (colourbar); node SHAPE = type (square =
+    concept, circle = attribute sink). Attributes are sinks with no rent, drawn
+    neutral. This is a marginal / leave-one-out attribution with every other
+    node present, so per-node rents do NOT sum to the total saving — a mid
+    concept is cheap only because its base children exist.
     """
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
+    from matplotlib.cm import ScalarMappable
+    from matplotlib.colors import Normalize
+    from matplotlib.lines import Line2D
 
     from mdlfca.codelength import Scorer
 
@@ -182,29 +182,46 @@ def plot_rent(res, png_path, title=""):
     if not concepts:
         return
     rent = {c: scorer.delta_remove_concept(c) for c in concepts}
-    usage = {c: res.counters.usage_of(c) for c in concepts}
     A = dag.n_attrs
-    notes = {c: f"{rent[c]:.0f} b" for c in concepts}
+    x, y = _node_layout(dag)
+    ymax = max(y.values())
 
-    ln_ymax = max(_node_layout(dag)[1].values())
-    fig, (axd, axb) = plt.subplots(
-        2, 1, figsize=(max(8, A * 0.55), 9),
-        gridspec_kw=dict(height_ratios=[ln_ymax + 1.6, 5], hspace=0.28))
+    cmap = plt.cm.YlGn
+    norm = Normalize(vmin=min(0.0, min(rent.values())), vmax=max(rent.values()))
 
-    _draw_dag(axd, dag, A, None, "learned", notes=notes)
-    axd.set_title(f"rent per concept — bits lost if the node were removed  ({title})")
+    fig, ax = plt.subplots(figsize=(max(8, A * 0.55), max(4.5, ymax * 1.7 + 2.5)))
+    for c in concepts:
+        for ch in dag.children[c]:
+            ax.plot([x[c], x[ch]], [y[c], y[ch]], "-", color="#b9b9b9", lw=1, zorder=1)
+    # attributes: circles, neutral (sinks, no rent)
+    for a in range(A):
+        ax.scatter([a], [0], s=240, marker="o", zorder=2,
+                   color="#e3e9ee", edgecolors=COL["attr_edge"])
+    # concepts: squares, colour = rent
+    for c in concepts:
+        ax.scatter([x[c]], [y[c]], s=560, marker="s", zorder=2,
+                   color=cmap(norm(rent[c])), edgecolors="#333")
+        ax.text(x[c], y[c], f"C{c}", ha="center", va="center", fontsize=7.5,
+                zorder=3, color="#111")
+        ax.annotate(f"{rent[c]:.0f} b", (x[c], y[c]), (0, -14),
+                    textcoords="offset points", ha="center", va="top",
+                    fontsize=6.5, color="#333", zorder=4)
+    ax.set_xlim(-0.7, A - 0.3)
+    ax.set_ylim(-0.9, ymax + 0.6)
+    ax.axis("off")
+    ax.set_title(f"earning its keep: node colour = leave-one-out rent  ({title})")
 
-    order = sorted(concepts, key=lambda c: rent[c], reverse=True)
-    vals = [rent[c] for c in order]
-    axb.bar(range(len(order)), vals,
-            color=["#2a8c50" if v >= 0 else "#be3c3c" for v in vals],
-            edgecolor="#7a4a12")
-    axb.axhline(0, color="#555", lw=0.8)
-    axb.set_xticks(range(len(order)))
-    axb.set_xticklabels([f"C{c}\n(n={usage[c]})" for c in order], fontsize=7)
-    axb.set_ylabel("rent (bits earned by keeping)")
-    axb.set_title("per-concept rent, sorted  (n = objects that explicitly use the concept)")
-    axb.grid(axis="y", alpha=0.3)
+    sm = ScalarMappable(norm=norm, cmap=cmap)
+    sm.set_array([])
+    cb = fig.colorbar(sm, ax=ax, fraction=0.03, pad=0.02)
+    cb.set_label("rent = bits lost if the node were removed")
+
+    ax.legend(handles=[
+        Line2D([], [], marker="s", ls="", mfc="#cfe0ee", mec="#333", ms=11,
+               label="concept (colour = rent)"),
+        Line2D([], [], marker="o", ls="", mfc="#e3e9ee", mec=COL["attr_edge"], ms=11,
+               label="attribute (sink; no rent)"),
+    ], loc="upper left", fontsize=8, frameon=True)
 
     fig.savefig(png_path, dpi=120, bbox_inches="tight")
     plt.close(fig)
