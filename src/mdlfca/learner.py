@@ -44,12 +44,15 @@ class LearnResult:
 
 class GreedyLearner:
     def __init__(self, X, sweep_every: int = 4, tol: float = 1e-9,
-                 max_outer: int = 200, verbose: bool = False):
+                 max_outer: int = 200, verbose: bool = False, on_commit=None):
         self.X = np.asarray(X, dtype=np.uint8)
         self.sweep_every = sweep_every
         self.tol = tol
         self.max_outer = max_outer
         self.verbose = verbose
+        # optional callback(learner, event) fired after every accepted move,
+        # used by the animation demo to snapshot each step; no effect if None.
+        self.on_commit = on_commit
 
     # ------------------------------------------------------------------ fit
     def fit(self) -> LearnResult:
@@ -254,6 +257,8 @@ class GreedyLearner:
         self._check_total()
         if self.verbose:
             print(f"{event}  L={self.total:.1f}")
+        if self.on_commit is not None:
+            self.on_commit(self, event)
 
     def _check_total(self) -> None:
         recomputed = self.scorer.total_codelength()

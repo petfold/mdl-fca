@@ -48,6 +48,22 @@ PYTHONPATH=src python3 demos/visualize.py
 Needs `matplotlib`. Edit `build_scenarios()` to add cases or resize existing
 ones; keep them smallish so the DAG stays legible.
 
+## `animate.py`
+
+Animates the learning process: every accepted move is a frame, assembled into a
+GIF with **fixed axes** so nothing jumps. Two per scenario, into `out/anim/`:
+
+- `<name>_learn.gif` — the learned DAG growing over the (fixed) data array. You
+  can watch the learner over-build concepts and then the sweep prune them back
+  (e.g. the 3-level case peaks near 38 concepts before settling at 14). The
+  newest concept each step is highlighted.
+- `<name>_codelength.gif` — the codelength trajectory and per-move delta L
+  revealed move by move against fixed axes.
+
+Snapshots are captured via `GreedyLearner`'s optional `on_commit` hook (a no-op
+when unused). Run: `PYTHONPATH=src python3 demos/animate.py`. Needs matplotlib
+(with its Pillow writer). The noise scenario makes no moves, so it is skipped.
+
 ## `tikz_export.py` → `tikz/`
 
 For LaTeX (Beamer / paper) contexts, `tikz_export.py` regenerates the same
