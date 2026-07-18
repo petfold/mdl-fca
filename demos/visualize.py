@@ -147,7 +147,7 @@ def plot_dag_over_matrix(res, dag, png_path, active=None, n_show=40):
     print(f"  wrote {png_path}")
 
 
-def plot_codelength(res, planted_L, png_path):
+def plot_codelength(res, planted_L, png_path, title=""):
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
@@ -157,13 +157,19 @@ def plot_codelength(res, planted_L, png_path):
 
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(9, 7), sharex=False)
     ax1.plot(range(len(traj)), traj, "-o", ms=3, color="#c8782a", label="total L")
-    ax1.axhline(planted_L, ls="--", color="#2a8c50", label=f"planted L = {planted_L:.0f}")
+    if planted_L is not None:
+        ax1.axhline(planted_L, ls="--", color="#2a8c50", label=f"planted L = {planted_L:.0f}")
     ax1.set_ylabel("total codelength (bits)")
-    ax1.set_title("compression trajectory")
+    ax1.set_title(f"compression trajectory{' — ' + title if title else ''}")
     ax1.legend()
     ax1.grid(alpha=0.3)
 
-    ax2.bar(range(len(deltas)), deltas, color=["#2a8c50" if d < 0 else "#be3c3c" for d in deltas])
+    if deltas:
+        ax2.bar(range(len(deltas)), deltas,
+                color=["#2a8c50" if d < 0 else "#be3c3c" for d in deltas])
+    else:
+        ax2.text(0.5, 0.5, "no compressive move found\n(model stays at the empty DAG)",
+                 ha="center", va="center", transform=ax2.transAxes, color="#be3c3c")
     ax2.set_xlabel("accepted move")
     ax2.set_ylabel("delta L (bits)")
     ax2.set_title("per-move delta L (negative = compresses)")
@@ -175,28 +181,66 @@ def plot_codelength(res, planted_L, png_path):
     print(f"  wrote {png_path}")
 
 
+def build_scenarios():
+    """Return a list of (name, title, X, planted). planted is a PlantedData or
+    None (noise). These mirror the recovery / product tests plus a noise control."""
+    import numpy as np
+    from mdlfca.generator import make_planted
+
+    scenarios = []
+
+    # 1. pure uncorrelated noise: independent Bernoulli(0.3), no structure.
+    #    Expectation: the learner posits ~no concepts (nothing pays rent).
+    rng = np.random.default_rng(0)
+    noise = (rng.random((600, 15)) < 0.3).astype(np.uint8)
+    scenarios.append(("noise", "uncorrelated noise (no structure)", noise, None))
+
+    # 2. two-level hierarchy (as in tests/test_recovery.py, smaller for legibility)
+    p2 = make_planted(n_attrs=16, level_sizes=(4, 2), n_objects=1500,
+                      attrs_per_base=(2, 4), eps_plus=0.02, eps_minus=0.02, seed=7)
+    scenarios.append(("two_level", "planted 2-level hierarchy", p2.X, p2))
+
+    # 3. three-level hierarchy (as in tests/test_recovery.py): deeper structure
+    p3 = make_planted(n_attrs=30, level_sizes=(8, 4, 2), n_objects=2000,
+                      attrs_per_base=(3, 5), children_per_concept=(2, 3),
+                      level_weight=2.0, eps_plus=0.02, eps_minus=0.02, seed=7)
+    scenarios.append(("three_level", "planted 3-level hierarchy", p3.X, p3))
+
+    # 4. product of two independent factors (as in tests/test_product.py)
+    common = dict(n_attrs=12, level_sizes=(4, 2), n_objects=1500,
+                  attrs_per_base=(2, 3), eps_plus=0.02, eps_minus=0.02)
+    pA = make_planted(seed=1, **common)
+    pB = make_planted(seed=2, **common)
+    scenarios.append(("product", "two independent factors (product)",
+                      np.hstack([pA.X, pB.X]), None))
+
+    return scenarios
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
     from mdlfca.generator import planted_codelength
 
-    p = make_planted(n_attrs=12, level_sizes=(4, 2), n_objects=800,
-                     attrs_per_base=(2, 3), eps_plus=0.02, eps_minus=0.02, seed=3)
-    print(f"planted: {p.dag.num_concepts} concepts, {p.dag.n_attrs} attributes, "
-          f"{len(p.codes)} objects")
+    for name, title, X, planted in build_scenarios():
+        print(f"\n=== {name}: {title} ===")
+        res = GreedyLearner(X).fit()
+        planted_L = planted_codelength(planted) if planted is not None else None
+        extra = f" (planted {planted_L:.0f})" if planted_L is not None else ""
+        print(f"  X: {X.shape[0]} objects x {X.shape[1]} attributes | "
+              f"learned {res.dag.num_concepts} concepts, L = {res.total:.0f}{extra}")
 
-    res = GreedyLearner(p.X).fit()
-    planted_L = planted_codelength(p)
-    print(f"learned: {res.dag.num_concepts} concepts, total L = {res.total:.0f} "
-          f"(planted {planted_L:.0f})")
+        if planted is not None:
+            render_dot(dag_to_dot(planted.dag, f"planted DAG — {title}"),
+                       os.path.join(OUT, f"{name}_dag_planted.png"))
+        # highlight the code of a well-populated object on the learned DAG
+        example = max(res.codes, key=len) if res.codes else set()
+        render_dot(dag_to_dot(res.dag, f"learned DAG — {title}", active=example),
+                   os.path.join(OUT, f"{name}_dag_learned.png"))
+        plot_dag_over_matrix(res, res.dag, os.path.join(OUT, f"{name}_codes.png"),
+                             active=example)
+        plot_codelength(res, planted_L, os.path.join(OUT, f"{name}_codelength.png"),
+                        title=title)
 
-    render_dot(dag_to_dot(p.dag, "planted DAG"), os.path.join(OUT, "dag_planted.png"))
-    # highlight one object's code on the learned DAG
-    example = res.codes[0]
-    render_dot(dag_to_dot(res.dag, f"learned DAG (object 0 code highlighted: {sorted(example)})",
-                          active=example),
-               os.path.join(OUT, "dag_learned.png"))
-    plot_dag_over_matrix(res, res.dag, os.path.join(OUT, "codes.png"), active=example)
-    plot_codelength(res, planted_L, os.path.join(OUT, "codelength.png"))
     print(f"\nDone. See {OUT}/")
 
 
