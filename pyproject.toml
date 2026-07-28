@@ -4,7 +4,7 @@ version = "0.0.1"
 description = "Learning concept DAGs from binary data by MDL — a probabilistic reworking of Formal Concept Analysis"
 license = { text = "BSD-3-Clause" }
 requires-python = ">=3.11"
-keywords = ["formal-concept-analysis", "minimum-description-length", "mdl", "concept-lattice", "unsupervised-learning", "information-theory", "knowledge-graph"]
+keywords = ["fca", "formal-concept-analysis", "formal concept analysis", "minimum-description-length", "mdl", "concept-lattice", "unsupervised", "unsupervised-learning", "unsupervised learning", "graph", "graph-learning", "graph learning", "dag", "dag-learning", "dag learning", "lattice-learning", "lattice learning", "information-theory", "knowledge-graph"]
 dependencies = ["numpy>=1.26"]
 
 [project.optional-dependencies]
