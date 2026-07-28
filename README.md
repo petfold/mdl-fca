@@ -1,5 +1,6 @@
 # mdl-fca
 
+[![tests](https://github.com/petfold/mdl-fca/actions/workflows/tests.yml/badge.svg)](https://github.com/petfold/mdl-fca/actions/workflows/tests.yml)
 [![license](https://img.shields.io/badge/license-BSD--3--Clause-blue)](LICENSE)
 [![status](https://img.shields.io/badge/status-prototype-orange)](docs/)
 
