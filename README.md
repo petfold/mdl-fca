@@ -1,5 +1,8 @@
 # mdl-fca
 
+[![license](https://img.shields.io/badge/license-BSD--3--Clause-blue)](LICENSE)
+[![status](https://img.shields.io/badge/status-prototype-orange)](docs/)
+
 Learning "good" concept DAGs from binary data by minimum description length —
 a probabilistic/information-theoretic reworking of Formal Concept Analysis.
 
