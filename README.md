@@ -27,7 +27,7 @@ Status: design phase complete, prototype under construction.
 ## Quick start (once the prototype exists)
 
 ```bash
-pip install -e ".[dev]"
+pip install -e ".[test]"
 pytest
 python examples/run_planted.py
 ```
