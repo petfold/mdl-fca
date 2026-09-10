@@ -2,10 +2,16 @@
 name = "mdlfca"
 version = "0.0.1"
 description = "Learning concept DAGs from binary data by MDL — a probabilistic reworking of Formal Concept Analysis"
+readme = "README.md"
 license = { text = "BSD-3-Clause" }
 requires-python = ">=3.11"
 keywords = ["fca", "formal-concept-analysis", "formal concept analysis", "minimum-description-length", "mdl", "concept-lattice", "unsupervised", "unsupervised-learning", "unsupervised learning", "graph", "graph-learning", "graph learning", "dag", "dag-learning", "dag learning", "lattice-learning", "lattice learning", "information-theory", "knowledge-graph"]
 dependencies = ["numpy>=1.26"]
+
+[project.urls]
+Homepage = "https://github.com/petfold/mdl-fca"
+Repository = "https://github.com/petfold/mdl-fca"
+Issues = "https://github.com/petfold/mdl-fca/issues"
 
 [project.optional-dependencies]
 test = ["pytest>=8"]
