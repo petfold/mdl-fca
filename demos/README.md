@@ -45,8 +45,9 @@ Run:
 PYTHONPATH=src python3 demos/visualize.py
 ```
 
-Needs `matplotlib`. Edit `build_scenarios()` to add cases or resize existing
-ones; keep them smallish so the DAG stays legible.
+Needs `matplotlib`, which the `demos` extra installs (`pip install -e '.[demos]'`);
+the core package itself stays numpy-only. Edit `build_scenarios()` to add cases or
+resize existing ones; keep them smallish so the DAG stays legible.
 
 ## `animate.py`
 

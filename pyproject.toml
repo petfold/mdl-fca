@@ -9,6 +9,7 @@ dependencies = ["numpy>=1.26"]
 
 [project.optional-dependencies]
 test = ["pytest>=8"]
+demos = ["matplotlib>=3.8"] # demos/ only; the core stays numpy-only
 dev = ["mdlfca[test]"] # back-compat alias; [test] is the stack-wide name
 
 [build-system]
