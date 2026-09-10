@@ -74,6 +74,69 @@ motivation: interpreting a learned sparse representation as an ontology.
 - Deterministic closure (v1) vs noisy propagation (v4): the v1 noise model puts
   all stochasticity at the observation layer.
 
+## 9. Performance and scaling
+Profiling (cProfile, 4000×40, 3-level) shows the batch **E-step**
+(`encode_object`) is ~94% of runtime; numpy is only at the I/O edges, so the hot
+path is pure-Python — the worry is real for large real data. Priorities, cheapest
+first; **optimise only after confirming greedy suffices** (§1/§3: restart-variance
+and gap-to-reference study — a rugged landscape or a scoring limit like the
+overlap rent is not fixed by a faster inner loop).
+
+**Done (low-hanging, no new deps):**
+- Cached **concept-reachability bitmask** (`DAG._reach_concepts`) makes
+  `reachable()` an O(1) bit test instead of a per-call DFS — it was ~45% of
+  runtime. Invalidated with the closure cache on every edge add / concept remove.
+- Hoisted the per-object **activation price and closure masks** out of the
+  encoder's inner loop (constant while one object is encoded), and inlined
+  `is_attribute` (87M calls) as `k < n_attrs` in the hot paths.
+- Result: ~1.7× on medium planted problems with **identical** output (same L,
+  concepts, moves); `reachable` no longer dominates. Remaining cost is the
+  encoder's inner item×round arithmetic — the boundary for the next tier.
+
+**Vectorisation — measured, and the axis that matters.** The E-step's big
+dimension is the **objects (rows)**, not the candidate items (columns): objects
+are independent given the fixed DAG in a pass, so they can be encoded in
+**lock-step blocks** (all objects do greedy round 1 together, round 2 together,
+with a boolean "still improving" mask retiring objects as they finish). We
+benchmarked three forms against the scalar loop, all producing *identical* output:
+- *Per-item vectorisation within one object* (wrong axis): **slower** everywhere
+  (0.5–0.8×) — numpy dispatch overhead per object dominates.
+- *Row-batched, dense boolean* `(B, items, attrs)`: ~1.3× up to ~60 attributes,
+  then **regresses below 1×** by 100 attributes — the dense array is O(B·items·attrs)
+  memory-bound.
+- *Row-batched, bit-packed* (uint8 words + popcount LUT): ~1.2–1.6× and holds at
+  scale (1.37× at 160 attributes).
+
+Key finding: the payoff is only a modest **constant factor (~1.4×)**, because the
+scalar baseline is *not* naive Python arithmetic — closure/coverage run on
+CPython's C-level arbitrary-precision integer bit operations. numpy is competing
+with compiled code, so it wins only modestly. Order-of-magnitude speed needs a
+compiled kernel and/or multiple cores, below. Not shipped: the ~1.4× doesn't
+justify the added complexity yet, and the row-block is really the unit for
+multicore. Benchmarks kept for the eventual kernel/parallel work.
+
+**Next tiers (deferred) — where the real speed is:**
+- **Multicore over row-blocks (likely the biggest practical lever).** The
+  vectorisation study confirmed objects are independent within a pass, so a pass
+  splits into row-blocks that encode fully in parallel and merge their sufficient
+  statistics — near-linear in cores. GIL means threads won't help pure Python;
+  use multiprocessing/joblib now (broadcast DAG, map over object shards, reduce
+  counts), or a GIL-releasing compiled kernel for threads. This is orthogonal to,
+  and larger than, the ~1.4× SIMD win.
+- **Compile the inner kernel** (`encode_object` + counter updates, a few hundred
+  lines) in Cython/numba or Rust via PyO3, keeping orchestration in Python:
+  packed-bitset ops with hardware POPCNT (no per-round 3D materialisation) plus a
+  freed GIL for real threads — this is where order-of-magnitude gains live, not in
+  pure numpy. A full Rust rewrite is premature and would cost the "readable and
+  hackable" property.
+- **Distributed:** the batch E-step is a textbook map-reduce over **additive
+  sufficient statistics** — the "scorer talks only to the counter store"
+  commitment is exactly what enables it: broadcast the DAG, each worker encodes
+  its object shard and returns summed usage/pair counts, the driver reduces and
+  runs the (serial) structural search. Parallelism is within a greedy round, not
+  across the sequence. Watch the pairwise co-usage store (O(items²) sparse) as the
+  communication/shuffle cost at scale.
+
 ## Positioning sentence for the eventual paper
 Slim/Krimp generalized from a flat code table to a DAG with closure semantics —
 equivalently, a probabilistic/MDL Formal Concept Analysis that only posits a

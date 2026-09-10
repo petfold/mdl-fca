@@ -25,6 +25,7 @@ class DAG:
         self.children: dict[int, set[int]] = {}  # concept -> child node ids
         self.parents: dict[int, set[int]] = {}   # node -> concepts pointing at it
         self._closure_mask: dict[int, int] = {}  # concept -> attr bitmask
+        self._reach_mask: dict[int, int] = {}    # concept -> reachable-concept bitmask
         self._next_id = n_attrs
 
     # ------------------------------------------------------------- queries
@@ -50,7 +51,7 @@ class DAG:
 
     def closure_mask(self, k: int) -> int:
         """Bitmask of attributes reachable from node k (k itself if attribute)."""
-        if self.is_attribute(k):
+        if k < self.n_attrs:            # attribute (inlined is_attribute; hot path)
             return 1 << k
         m = self._closure_mask.get(k)
         if m is None:
@@ -58,6 +59,21 @@ class DAG:
             for ch in self.children[k]:
                 m |= self.closure_mask(ch)
             self._closure_mask[k] = m
+        return m
+
+    def _reach_concepts(self, k: int) -> int:
+        """Bitmask of concept ids strictly reachable from concept k (0 for an
+        attribute). Cached like closure_mask; makes reachable() an O(1) bit test
+        instead of a per-call DFS."""
+        if k < self.n_attrs:
+            return 0
+        m = self._reach_mask.get(k)
+        if m is None:
+            m = 0
+            for ch in self.children[k]:
+                if ch >= self.n_attrs:          # concept child
+                    m |= (1 << ch) | self._reach_concepts(ch)
+            self._reach_mask[k] = m
         return m
 
     def closure(self, k: int) -> frozenset[int]:
@@ -71,20 +87,11 @@ class DAG:
 
     def reachable(self, u: int, v: int) -> bool:
         """True iff v is reachable from u by one or more edges (strict)."""
-        if u == v or self.is_attribute(u):
+        if u == v or u < self.n_attrs:              # u is an attribute (a sink)
             return False
-        if self.is_attribute(v):
+        if v < self.n_attrs:                        # v is an attribute
             return bool((self.closure_mask(u) >> v) & 1)
-        stack, seen = [u], set()
-        while stack:
-            k = stack.pop()
-            for ch in self.children[k]:
-                if ch == v:
-                    return True
-                if not self.is_attribute(ch) and ch not in seen:
-                    seen.add(ch)
-                    stack.append(ch)
-        return False
+        return bool((self._reach_concepts(u) >> v) & 1)
 
     def ancestors(self, k: int) -> set[int]:
         out: set[int] = set()
@@ -121,6 +128,10 @@ class DAG:
     def remove_concept(self, c: int, rewire: bool = True):
         """Delete concept c. With rewire=True every parent of c inherits c's
         children, so the closure of every surviving node is unchanged."""
+        # concept-reachability of every ancestor loses the bit for c (and, under
+        # rewire, keeps everything below c), so drop their cached reach masks.
+        for a in (self.ancestors(c) | {c}):
+            self._reach_mask.pop(a, None)
         kids = self.children.pop(c)
         for ch in kids:
             self.parents[ch].discard(c)
@@ -140,5 +151,7 @@ class DAG:
 
     def _invalidate(self, k: int) -> None:
         self._closure_mask.pop(k, None)
+        self._reach_mask.pop(k, None)
         for a in self.ancestors(k):
             self._closure_mask.pop(a, None)
+            self._reach_mask.pop(a, None)
