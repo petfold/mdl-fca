@@ -1,6 +1,26 @@
 # 06 — Roadmap (deferred, in rough order)
 
 Everything here was discussed and deliberately deferred. Nothing should be lost.
+Items are ticked when they land; each section keeps the reasoning that decided
+it, since the reasoning is the point of the deferral.
+
+## Status at a glance
+
+- [x] §9 low-hanging performance work (DONE 2026-07-18): cached concept
+      reachability, hoisted encoder work, ~1.7× with identical output.
+- [x] §9 vectorisation study (DONE 2026-07-18): measured, written up, and
+      **deliberately not shipped** — the ~1.4× does not justify the complexity.
+- [x] §5 product-of-DAGs note, experiment and regression test (DONE
+      2026-07-18).
+- [ ] §1 richer proposal set + refinement search — the prerequisite for the
+      rest, since §9 says optimise only after confirming greedy suffices.
+- [ ] §2 online / prequential driver
+- [ ] §3 Bayesian version
+- [ ] §4 deep generative version
+- [ ] §6 baselines for the paper
+- [ ] §7 evaluation beyond planted recovery
+- [ ] §8 theoretical caveats written up
+- [ ] §9 next tiers: multicore over row-blocks, then a compiled kernel
 
 ## 1. Richer proposal set + refinement search
 Add to the greedy constructor: merge (overlapping extents/intents), split
@@ -105,13 +125,13 @@ and gap-to-reference study — a rugged landscape or a scoring limit like the
 overlap rent is not fixed by a faster inner loop).
 
 **Done (low-hanging, no new deps):**
-- Cached **concept-reachability bitmask** (`DAG._reach_concepts`) makes
+- [x] Cached **concept-reachability bitmask** (`DAG._reach_concepts`) makes
   `reachable()` an O(1) bit test instead of a per-call DFS — it was ~45% of
   runtime. Invalidated with the closure cache on every edge add / concept remove.
-- Hoisted the per-object **activation price and closure masks** out of the
+- [x] Hoisted the per-object **activation price and closure masks** out of the
   encoder's inner loop (constant while one object is encoded), and inlined
   `is_attribute` (87M calls) as `k < n_attrs` in the hot paths.
-- Result: ~1.7× on medium planted problems with **identical** output (same L,
+- [x] Result: ~1.7× on medium planted problems with **identical** output (same L,
   concepts, moves); `reachable` no longer dominates. Remaining cost is the
   encoder's inner item×round arithmetic — the boundary for the next tier.
 
@@ -138,20 +158,20 @@ justify the added complexity yet, and the row-block is really the unit for
 multicore. Benchmarks kept for the eventual kernel/parallel work.
 
 **Next tiers (deferred) — where the real speed is:**
-- **Multicore over row-blocks (likely the biggest practical lever).** The
+- [ ] **Multicore over row-blocks (likely the biggest practical lever).** The
   vectorisation study confirmed objects are independent within a pass, so a pass
   splits into row-blocks that encode fully in parallel and merge their sufficient
   statistics — near-linear in cores. GIL means threads won't help pure Python;
   use multiprocessing/joblib now (broadcast DAG, map over object shards, reduce
   counts), or a GIL-releasing compiled kernel for threads. This is orthogonal to,
   and larger than, the ~1.4× SIMD win.
-- **Compile the inner kernel** (`encode_object` + counter updates, a few hundred
+- [ ] **Compile the inner kernel** (`encode_object` + counter updates, a few hundred
   lines) in Cython/numba or Rust via PyO3, keeping orchestration in Python:
   packed-bitset ops with hardware POPCNT (no per-round 3D materialisation) plus a
   freed GIL for real threads — this is where order-of-magnitude gains live, not in
   pure numpy. A full Rust rewrite is premature and would cost the "readable and
   hackable" property.
-- **Distributed:** the batch E-step is a textbook map-reduce over **additive
+- [ ] **Distributed:** the batch E-step is a textbook map-reduce over **additive
   sufficient statistics** — the "scorer talks only to the counter store"
   commitment is exactly what enables it: broadcast the DAG, each worker encodes
   its object shard and returns summed usage/pair counts, the driver reduces and
