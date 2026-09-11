@@ -29,6 +29,6 @@ Status: design phase complete, prototype under construction.
 
 ```bash
 pip install -e ".[test]"
-pytest
+pytest                       # 15 tests
 python examples/run_planted.py
 ```
