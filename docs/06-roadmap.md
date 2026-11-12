@@ -266,8 +266,16 @@ form. Its shipped vocabulary has 11,643 nodes and 12,995 edges; 11% of the
 nodes have several parents, a node has 5.3 ancestors on average and 19 at
 most, and there are 16 top-level categories (`experiments/codes_probe.py`
 there prints these). Step 1 of its plan `docs/plans/CODES_AND_FACTORS.md`
-writes a store's context as a file: the objects are its 8,795 leaves, the
-attributes its 2,848 categories, the crosses the closed code.
+is built (2026-11-12): `experiments/context_export.py` there writes a
+store's context as three files, `OUT.cxt` (Burmeister), `OUT.npy` (the
+table as bytes, one row an object) and `OUT.json` (the names, the store's
+own edges among them, and the knowledge id the table was made from). For
+the whole shipped vocabulary that is 8,795 objects by 2,847 attributes
+with 39,522 crosses and 2,944 different rows; below `place` alone, 439 by
+183 with 1,601 crosses, 175 different rows and 31 attributes with
+several parents:
+
+    python3 experiments/context_export.py /tmp/place --packs all --below place
 
 What that gives this project:
 
@@ -284,14 +292,27 @@ What that gives this project:
    should return the top-level branches as separate components with no
    concept across them (§5). The 694 nodes that stand under several top-level
    categories are real bridge concepts: the partial product §5 leaves open.
-4. **Scale.** 8,795 × 2,848 is far past the planted problems (§9 profiled
-   4000 × 40). Start with one top-level branch (`place`, 584 nodes) and let
-   it decide which of §9's next tiers comes first.
+4. **Scale.** 8,795 × 2,847 is far past the planted problems (§9 profiled
+   4000 × 40). Start with one top-level branch (`place`, 439 × 183) and
+   let it decide which of §9's next tiers comes first.
 
 Flipping bits at a known rate tests the residual terms on real structure.
 
-**The interface is files.** mdl-fca reads a Burmeister `.cxt` file, or the
-same table as a numpy array, and a list of reference edges. It does not
+**A first run (2026-11-12),** `python examples/run_context.py /tmp/place`:
+439 objects by 183 attributes, learned in 1.1 s. 39 concepts and 91 edges;
+the codelength falls from 9,132 to 7,241 bits, 79% of the empty model's.
+14 of the 162 categories whose code has more than one attribute come back
+exactly. The most used concepts are upper combinations
+(`{geographical-area, region}`, `{artifact, building, structure}`), several
+of them a category's code less one attribute, which exact matching does not
+count; doc 01's matching by extent overlap would. With 439 leaves in 175
+different rows, most categories have two or three objects and cannot pay
+rent: a vocabulary's leaves are thin data, and a store with items filed
+under it is the fairer test. The whole vocabulary, 8,795 by 2,847, did not
+finish in ten minutes, so it waits for §9's next tier.
+
+**The interface is files.** mdl-fca reads the `.npy` table (or the
+Burmeister `.cxt`) and the reference edges in the `.json`. It does not
 import ontodag, and ontodag never imports mdl-fca. What the learner finds
 goes back as a list of concepts with their attributes; putting one into a
 store is a person's act there, never an automatic merge.
