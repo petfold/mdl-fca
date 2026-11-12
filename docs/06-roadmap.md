@@ -327,13 +327,16 @@ instances of the place categories under them (890 under two or more), and
 | found to within one attribute | 36 of 162 | 291 of 366 |
 
 With enough items to pay their rent, four categories in five come back
-to within one attribute, and one in five exactly. The one attribute is
-nearly always a broad one (`artifact`, `natural-object`) that the learner
-leaves to be switched on by itself: a concept for `mountain` holds
-`landform` and `natural-elevation` and stops short of the top. That is
-the overlap rent of doc 02 seen on real data, and the first thing to look
-at. "Within one attribute" asks that the concept hold the category's own
-attribute, so a parent's code does not pass for its child's.
+to within one attribute, and one in five exactly. Of the 217 that are one
+attribute off, 210 lack one, and it is the same one every time:
+`physical-object`, the top-level attribute most of these places share
+(seven have one too many). The concept for `mountain` holds `landform`,
+`natural-elevation` and `natural-object`, and stops one short of the top,
+which each object switches on by itself. So the learner finds the
+hierarchy and declines to hang it under its broadest node: the overlap
+rent of doc 02 on real data, and the first thing to look at. "Within one
+attribute" asks that the concept hold the category's own attribute, so a
+parent's code does not pass for its child's.
 
 **The interface is files.** mdl-fca reads the `.npy` table (or the
 Burmeister `.cxt`) and the reference edges in the `.json`. It does not
