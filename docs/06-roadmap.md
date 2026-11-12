@@ -311,6 +311,30 @@ rent: a vocabulary's leaves are thin data, and a store with items filed
 under it is the fairer test. The whole vocabulary, 8,795 by 2,847, did not
 finish in ten minutes, so it waits for §9's next tier.
 
+**A second run, on real items (2026-11-12).** ontodag-core's
+`tools/instances.py place OUT.od` files 9,651 things Wikidata calls
+instances of the place categories under them (890 under two or more), and
+`context_export.py OUT --store OUT.od --below place` makes the table:
+9,876 objects by 397 attributes, 53,369 crosses, 802 different rows.
+
+| | leaves only | with real items |
+|---|---|---|
+| objects by attributes | 439 by 183 | 9,876 by 397 |
+| time | 1.5 s | 138 s |
+| concepts, edges | 39, 91 | 337, 849 |
+| codelength against the empty model | 79% | 45% |
+| categories found exactly | 14 of 162 | 74 of 366 |
+| found to within one attribute | 36 of 162 | 291 of 366 |
+
+With enough items to pay their rent, four categories in five come back
+to within one attribute, and one in five exactly. The one attribute is
+nearly always a broad one (`artifact`, `natural-object`) that the learner
+leaves to be switched on by itself: a concept for `mountain` holds
+`landform` and `natural-elevation` and stops short of the top. That is
+the overlap rent of doc 02 seen on real data, and the first thing to look
+at. "Within one attribute" asks that the concept hold the category's own
+attribute, so a parent's code does not pass for its child's.
+
 **The interface is files.** mdl-fca reads the `.npy` table (or the
 Burmeister `.cxt`) and the reference edges in the `.json`. It does not
 import ontodag, and ontodag never imports mdl-fca. What the learner finds

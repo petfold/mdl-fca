@@ -5,7 +5,10 @@ Runs the greedy MDL learner on a table written by OntoDAG's
 it found. The reference is in the table's `.json` file: the store's edges
 among the names, from which each category's closed code follows (itself
 and every attribute above it). A learned concept counts as a category
-found when its attributes are exactly such a code.
+found when its attributes are exactly such a code. A second count allows
+one attribute more or less, as long as the concept holds the category's
+own attribute: the learner often leaves a broad attribute to be switched
+on by itself, and a parent's code is not its child's.
 
 Usage: python examples/run_context.py PREFIX      (PREFIX.npy, PREFIX.json)
 """
@@ -71,6 +74,14 @@ def main():
     print(f"concepts that are exactly a category's code: "
           f"{sum(1 for c in closures.values() if c in named)} of "
           f"{len(closures)}; categories found: {len(found & several)} of "
+          f"{len(several)}")
+    column = {name: i for i, name in enumerate(attributes)}
+    learned = set(closures.values())
+    near = sum(1 for name in several
+               if any(column[name] in closure
+                      and len(codes[name] ^ closure) <= 1
+                      for closure in learned))
+    print(f"categories found to within one attribute: {near} of "
           f"{len(several)}")
     by_use = sorted(closures, key=lambda c: -result.counters.usage_of(c))
     for c in by_use[:args.show]:
