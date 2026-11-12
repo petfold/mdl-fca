@@ -32,7 +32,8 @@ literature, so even the simple version is novel.
    and how the online (prequential) variant is a small delta on the same core.
 5. `docs/05-prototype-spec.md` — the concrete build order for THIS session.
 6. `docs/06-roadmap.md` — everything deliberately deferred (deep multi-layer
-   noisy-OR, Bayesian sampling, product-of-DAGs / factorial codes, alternatives).
+   noisy-OR, Bayesian sampling, product-of-DAGs / factorial codes, learning
+   the code first, real ontologies from OntoDAG as test data, alternatives).
 
 ## The one-sentence summary
 

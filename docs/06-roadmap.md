@@ -21,6 +21,8 @@ it, since the reasoning is the point of the deferral.
 - [ ] §7 evaluation beyond planted recovery
 - [ ] §8 theoretical caveats written up
 - [ ] §9 next tiers: multicore over row-blocks, then a compiled kernel
+- [ ] §10 learning the code first: `from_code`, three starts compared
+- [ ] §11 real ontologies from OntoDAG as test data
 
 ## 1. Richer proposal set + refinement search
 Add to the greedy constructor: merge (overlapping extents/intents), split
@@ -91,6 +93,13 @@ sidesteps it. Follow-up: emit the factors as first-class output (connected
 components of the loading graph — a linear-time post-step). Overlap *within* a
 block is the genuinely hard case and coincides with the §1 / docs 02 overlap
 limitation.
+
+**A consumer for the factors (2026-11-12).** OntoDAG's
+`docs/plans/CODES_AND_FACTORS.md` §7 would use them: to keep a derived index
+small (one code per factor, no code for the combinations) and to group what a
+browser offers. Its stored graph is already the note's coproduct: an item's
+parents are its antichain code, and no node stands for a combination unless
+someone names one. §11 below uses its stores as test data.
 
 ## 6. Baselines to implement for the paper
 - Full FCA lattice size (already in prototype as a display number); iceberg
@@ -178,6 +187,114 @@ multicore. Benchmarks kept for the eventual kernel/parallel work.
   runs the (serial) structural search. Parallelism is within a greedy round, not
   across the sequence. Watch the pairwise co-usage store (O(items²) sparse) as the
   communication/shuffle cost at scale.
+
+## 10. Learning the code first (added 2026-11-12)
+
+**The question.** Learning a binary code from data is a far more explored
+field than learning a DAG. Would it be easier to learn the code and convert
+it?
+
+**What stands already.** `note/product-of-dags-note.tex` shows the choice is
+not either/or: the DAG is the decoder, an object's antichain is its code, and
+the factors are the DAG's connected components.
+
+**What that leaves open: there are two codes, and an outside learner gives
+neither.**
+
+- The **antichain code** `S_n` holds only the most specific active concepts.
+  The encoder emits it and the usage term prices it. In OntoDAG it is an
+  item's stored parents.
+- The **closed code** holds every concept at or above an active one. It is
+  FCA's intent, and in OntoDAG a node's ancestors.
+
+Given the DAG, each gives the other: closure one way, transitive reduction the
+other. Without the DAG, a learner rewarded for sparseness drifts toward the
+antichain code: the unit for a general concept stops firing where a more
+specific unit covers the case (in sparse autoencoders this is reported as
+feature absorption; Chanin et al., 2024). A learner with no such reward
+drifts toward the closed code. So the order among units is read differently
+in the two cases:
+
+- from a closed code, by inclusion between the units' **extents** (the code's
+  columns);
+- from an antichain code, the extents do not nest: a general unit and its
+  specific ones never fire together. The order is in the **decoder**: unit
+  `v` is the more specific, and gets an edge to `u`, when the attributes `u`
+  switches on are among those `v` switches on.
+
+**The route.** `from_code(U, B)` takes an object×unit code and a unit×attribute
+decoder, as any Boolean factorisation `X ≈ U ∘ B` gives them:
+
+1. order the units by inclusion of their decoder rows, reduce, and add the
+   attribute edges each unit still needs;
+2. encode every object afresh with the project's encoder, which yields
+   antichain codes whatever `U` was;
+3. score with the same `L(G, X)`, run prune-and-collapse, and go on with the
+   greedy moves.
+
+The result is a **starting model for the existing search**, never an answer.
+The score does not change (doc 02), and no tolerance is tuned by hand: an edge
+that does not pay is pruned by the same rule as any other.
+
+**Where the codes come from**, cheapest first:
+
+1. Boolean matrix factorisation: Asso, or GreConD (Belohlavek & Vychodil),
+   whose factors are formal concepts, so its decoder rows are intents and
+   nest by construction. Both belong on §6's baseline list anyway.
+2. The learner's own flat output: merges among attributes only, then the
+   order.
+3. A binary sparse code, or the features of a sparse autoencoder, cut at a
+   threshold: the original motive, reading a learned representation as an
+   ontology (§7). These need more than numpy, so they stay outside the
+   package, as an example.
+
+**What to expect.** A unit proposes a whole concept where pair-merging builds
+a ladder of four merges and collapses it, so width should come faster. Depth
+should not: a flat factoriser cannot see correlations among latent concepts
+(doc 01), and the levels must still come from the greedy moves. This is §1's
+"add-concept from closed itemsets" with another miner.
+
+**The experiment that decides.** On the planted generator, three starts: the
+empty model, a GreConD code, and the planted concepts themselves as a ceiling.
+Compare codelength reached, recovery (doc 01's criteria) and time. It belongs
+with §1's study of whether greedy suffices, as one more starting point.
+
+## 11. Real ontologies from OntoDAG (added 2026-11-12)
+
+OntoDAG (`../ontodag`) holds hand-built ontologies in a canonical reduced
+form. Its shipped vocabulary has 11,643 nodes and 12,995 edges; 11% of the
+nodes have several parents, a node has 5.3 ancestors on average and 19 at
+most, and there are 16 top-level categories (`experiments/codes_probe.py`
+there prints these). Step 1 of its plan `docs/plans/CODES_AND_FACTORS.md`
+writes a store's context as a file: the objects are its 8,795 leaves, the
+attributes its 2,848 categories, the crosses the closed code.
+
+What that gives this project:
+
+1. **Recovery against a known DAG that nobody planted.** The reference is the
+   ontology's own reduction. How much of it the learner returns, and which
+   categories it declines because they do not pay rent, is the measurement.
+   The second half is a question in its own right: do the concepts MDL keeps
+   agree with the ones people name? (OntoDAG's paper, direction D8.)
+2. **Depth and several parents together.** The 1,279 nodes with several
+   parents are overlap cases from real use, for the limitation in doc 02 and
+   in `note/concept-dag-note.tex`.
+3. **The product on a real vocabulary.** File items under one category from
+   each of several top-level categories, as OntoDAG's probe does. The learner
+   should return the top-level branches as separate components with no
+   concept across them (§5). The 694 nodes that stand under several top-level
+   categories are real bridge concepts: the partial product §5 leaves open.
+4. **Scale.** 8,795 × 2,848 is far past the planted problems (§9 profiled
+   4000 × 40). Start with one top-level branch (`place`, 584 nodes) and let
+   it decide which of §9's next tiers comes first.
+
+Flipping bits at a known rate tests the residual terms on real structure.
+
+**The interface is files.** mdl-fca reads a Burmeister `.cxt` file, or the
+same table as a numpy array, and a list of reference edges. It does not
+import ontodag, and ontodag never imports mdl-fca. What the learner finds
+goes back as a list of concepts with their attributes; putting one into a
+store is a person's act there, never an automatic merge.
 
 ## Positioning sentence for the eventual paper
 Slim/Krimp generalized from a flat code table to a DAG with closure semantics —
